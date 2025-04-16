@@ -1,0 +1,40 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "API",
+  "main": "api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server"
+  },
+  "author": "KASRAOUI Oussama",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.19.0",
+    "concurrently": "^6.2.0",
+    "connect-mongo": "^5.1.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.10",
+    "dotenv": "^16.3.1",
+    "express": "^4.17.1",
+    "express-session": "^1.18.1",
+    "is-empty": "^1.2.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^5.13.5",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "node-cache": "^5.1.2",
+    "nodemailer": "^6.9.15",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.0",
+    "qs": "^6.12.1",
+    "sequelize": "^6.6.5",
+    "socket.io": "^4.7.4",
+    "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.6.0",
+    "nodemon": "^2.0.12"
+  }
+}
