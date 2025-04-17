@@ -22,13 +22,13 @@ const RoleSchema = new Schema({
 // --- Role Schema Methods ---
 
 // Custom toJSON method to modify the response structure
-RoleSchema.method("toJSON", function () {
+RoleSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatRole(object);
+  return formatRole(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method for custom populated structure
-RoleSchema.method("populateAndTransform", async function () {
+RoleSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
   const populatePaths = [
     // populationSettingsXXXXXXX('roleOrganization', 'USER'), // Populate assignedContractor with specific fields
     populationSettingsContractors('roleContractor', 'USER'), // Populate assignedContractor with specific fields
@@ -54,12 +54,12 @@ RoleSchema.method("populateAndTransform", async function () {
 
 
   // Return the transformed object using toJSON
-  return this.toJSON();
+  return this.toJSON(whoIsDemanding);
 });
 
 
 // Static method to count records by criteria
-RoleSchema.statics.Count = async function (criteria = {}, limit = null) { // Added default filter, allow null limit
+RoleSchema.statics.Count = async function (criteria = {}, limit = null, whoIsDemanding = 'USER') { // Added default filter, allow null limit
   try {
     const query = this.find(criteria);
     if (limit !== null) {
@@ -70,7 +70,7 @@ RoleSchema.statics.Count = async function (criteria = {}, limit = null) { // Add
     // return { count };
     const documents = await query.exec();
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

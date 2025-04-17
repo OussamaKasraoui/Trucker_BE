@@ -26,7 +26,7 @@ exports.create = async function (twoFAData, session) {
     const /* newTwoFA */ populatedTwoFA = await TwoFA.create(twoFAObject, session ? { session } : undefined);
 
     // Populate and transform the result
-    //const populatedTwoFA = await newTwoFA.populateAndTransform();
+    //const populatedTwoFA = await newTwoFA.populateAndTransform(whoIsDemanding);
 
     // Check if the document was populated successfully
     if (!populatedTwoFA) {
@@ -73,7 +73,7 @@ exports.create = async function (twoFAData, session) {
 };
 
 // Find by ID TwoFA Helper function
-exports.findById = async function (id) {
+exports.findById = async function (id, whoIsDemanding = 'USER') {
   let returnResult = {
     error: false,
     payload: null,
@@ -99,7 +99,7 @@ exports.findById = async function (id) {
       returnResult.code = 404;  // Not found
     } else {
       // If found, populate and transform the document
-      returnResult.payload = await foundTwoFA.populateAndTransform();
+      returnResult.payload = await foundTwoFA.populateAndTransform(whoIsDemanding);
       returnResult.code = 200;  // OK
     }
 
@@ -155,7 +155,7 @@ exports.update = async function (id, updates) {
       returnResult.code = 404;  // Not found
     } else {
       // Populate and transform the updated document
-      returnResult.payload = await updatedTwoFA.populateAndTransform();
+      returnResult.payload = await updatedTwoFA.populateAndTransform(whoIsDemanding);
       returnResult.code = 200;  // OK
     }
 
@@ -188,7 +188,7 @@ exports.update = async function (id, updates) {
 
 
 // Update TwoFA Helper function
-exports.verify = async function (userID) {
+exports.verify = async function (userID, whoIsDemanding = 'USER') {
   let returnTwoFA = {
     error: false,
     payload: null,
@@ -235,7 +235,7 @@ exports.verify = async function (userID) {
       returnTwoFA.code = 404;  // Not found or condition not met
     } else {
        // Populate and transform the updated document
-      const populatedTwoFA = await updatedTwoFA.populateAndTransform(); // Ensure this method exists and works
+      const populatedTwoFA = await updatedTwoFA.populateAndTransform(whoIsDemanding); // Ensure this method exists and works
       returnTwoFA.payload = populatedTwoFA;
       returnTwoFA.code = 200;  // OK: document updated successfully
     }
@@ -269,7 +269,7 @@ exports.verify = async function (userID) {
 
 
 // Update TwoFA Helper function
-exports.resend = async function (userID, updates) {
+exports.resend = async function (userID, whoIsDemanding = 'USER') {
   let returnResult = {
     error: false,
     payload: null,
@@ -359,7 +359,7 @@ exports.resend = async function (userID, updates) {
     } else {
       // Populate and transform the updated document
       // Ensure populateAndTransform exists and works as expected on the model
-      returnResult.payload = await updatedTwoFA.populateAndTransform();
+      returnResult.payload = await updatedTwoFA.populateAndTransform(whoIsDemanding);
       returnResult.code = 200;  // OK
     }
 

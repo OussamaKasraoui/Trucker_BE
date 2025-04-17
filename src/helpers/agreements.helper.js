@@ -122,7 +122,7 @@ exports.findAll = async function (query) {
         const agreements = await Agreement.find(query)
 
         returnContext.payload = await Promise.all(agreements.map(async (agreement) => {
-            return await agreement.populateAndTransform();
+            return await agreement.populateAndTransform(whoIsDemanding);
         }));
 
     } catch (error) {

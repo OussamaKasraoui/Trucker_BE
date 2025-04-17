@@ -91,7 +91,7 @@ isAllowed = async (req, res, next) => {
     const packOptions = req.decoded.pack.packOptions;
 
     // Check if Contracts are there
-    const existContracts = await Count(Contract, { contractContractor: contractor.id }, -1);
+    const existContracts = await Count(Contract, { contractContractor: contractor.id }, -1, "MANAGER"); // TODO: Check if this is correct
 
     if (existContracts.length > packOptions.sites) {
       return res.status(403).send({

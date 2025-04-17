@@ -82,116 +82,6 @@ const formatAgreement = function(agreement, whoIsDemanding="USER") {
     return object;
 };
 
-const formatApartment = function (apartment, whoIsDemanding="USER") {
-    if (!apartment) return null;
-    const object = {}
-
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (apartment._id) {
-                object.id = apartment._id.toString();
-            }
-            
-            if (apartment.apartmentName) {
-                object.name = apartment.apartmentName;
-            }
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if(apartment.apartmentUser){
-                object.apartmentUser = formatUser(apartment.apartmentUser, whoIsDemanding);
-            }
-    
-            if(apartment.apartmentOwner){
-                object.apartmentOwner = formatUser(apartment.apartmentOwner, whoIsDemanding);
-            }
-    
-            if(apartment.apartmentBuilding){
-                object.apartmentBuilding =  formatBuilding(apartment.apartmentBuilding, whoIsDemanding);
-            }
-    
-            if(apartment.apartmentSite){
-                object.apartmentSite = formatSite(apartment.apartmentSite, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if(apartment.apartmentContract){
-                object.apartmentContract = formatContract(apartment.apartmentContract, whoIsDemanding);
-            }
-
-            if (apartment.__v !== undefined) {
-                object.__v = apartment.__v;
-            }
-            
-            if (apartment.createdAt) {
-                object.createdAt = apartment.createdAt;
-            }
-            
-            if (apartment.updatedAt) {
-                object.updatedAt = apartment.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error("Error formatting apartment:", error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
-const formatBuilding = function (building, whoIsDemanding="USER") {
-    if (!building) return null;
-    const object = {}
-
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (building._id) {
-                object.id = building._id.toString();
-            }
-            
-            if (building.buildingName) {
-                object.name = building.buildingName;
-            }
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (building.buildingSite) {
-                object.buildingSite =  formatSite(building.buildingSite, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (building.buildingContract) {
-                object.buildingContract =  formatContract(building.buildingContract, whoIsDemanding);
-            }
-
-            if (building.__v !== undefined) {
-                object.__v = building.__v;
-            }
-            
-            if (building.createdAt) {
-                object.createdAt = building.createdAt;
-            }
-            
-            if (building.updatedAt) {
-                object.updatedAt = building.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error("Error formatting building:", error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
 const formatContractor = function (contractor, whoIsDemanding="USER") {
     if (!contractor) return null;
     const object = {}
@@ -291,257 +181,6 @@ const formatContract = function (contract, whoIsDemanding="USER") {
     return object;
 };
 
-const formatCotisation = function (cotisation, whoIsDemanding="USER") {
-    if (!cotisation) return null;
-    const object = {}
-
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (cotisation.id || cotisation._id) {
-                object.id = cotisation.id || cotisation._id.toString();
-            }
-            
-            object.name = `${cotisation.cotisationType}_${cotisation?.cotisationAppartment}`;
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (cotisation.cotisationApartment) {
-                object.cotisationApartment = formatApartment(cotisation.cotisationApartment, whoIsDemanding);
-            }
-    
-            if (cotisation.cotisationOwner) {
-                object.cotisationOwner = formatUser(cotisation.cotisationOwner, whoIsDemanding);
-            }
-    
-            if (cotisation.ownershipShare) {
-                object.ownershipShare = formatOwnershipShare(cotisation.ownershipShare, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (cotisation.__v !== undefined) {
-                object.__v = cotisation.__v;
-            }
-            
-            if (cotisation.createdAt) {
-                object.createdAt = cotisation.createdAt;
-            }
-            
-            if (cotisation.updatedAt) {
-                object.updatedAt = cotisation.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting cotisation:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
-const formatDepense = function (depense, whoIsDemanding="USER") {
-    if (!depense) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (depense.id || depense._id) {
-                object.id = depense.id || depense._id.toString();
-            }
-            
-            if (depense.depenseName) {
-                object.name = depense.depenseName;
-            }
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (depense.depenseStuff) {
-                object.depenseStuff = formatStaff(depense.depenseStuff, whoIsDemanding);
-            }
-    
-            if (depense.depenseBenificiaire) {
-                object.depenseBenificiaire = formatContractor(depense.depenseBenificiaire, whoIsDemanding);
-            }
-    
-            if (depense.depenseMission) {
-                object.depenseMission = formatMission(depense.depenseMission, whoIsDemanding);
-            }
-    
-            if (depense.depenseTask) {
-                object.depenseTask = formatTask(depense.depenseTask, whoIsDemanding);
-            }
-    
-            if (depense.reserveFundSource) {
-                object.reserveFundSource = formatReserveFund(depense.reserveFundSource, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (depense.agreement) {
-                object.agreement = formatAgreement(depense.agreement, whoIsDemanding);
-            }
-
-            if (depense.__v !== undefined) {
-                object.__v = depense.__v;
-            }
-            
-            if (depense.createdAt) {
-                object.createdAt = depense.createdAt;
-            }
-            
-            if (depense.updatedAt) {
-                object.updatedAt = depense.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting depense:`, error);
-        return null; // Handle the error as needed
-    }
-    
-    return object;
-};
-
-const formatDevis = function (devis, whoIsDemanding="USER") {
-    if (!devis) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (devis.id || devis._id) {
-                object.id = devis.id || devis._id.toString();
-            }
-            
-            object.name = devis.devisServiceRequest?.name;
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (devis.devisMissions && Array.isArray(devis.devisMissions)) {
-                object.devisMissions = devis.devisMissions.map(mission => formatMission(mission, whoIsDemanding));
-            }
-    
-            if (devis.devisUser) {
-                object.devisUser = formatUser(devis.devisUser, whoIsDemanding);
-            }
-    
-            if (devis.devisServiceRequest) {
-                object.devisServiceRequest = formatServiceRequest(devis.devisServiceRequest, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (devis.__v !== undefined) {
-                object.__v = devis.__v;
-            }
-            
-            if (devis.createdAt) {
-                object.createdAt = devis.createdAt;
-            }
-            
-            if (devis.updatedAt) {
-                object.updatedAt = devis.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting devis:`, error);
-        return null; // Handle the error as needed
-    }
-    
-    return object;
-};
-
-const formatMission = function (mission, whoIsDemanding="USER") {
-    if (!mission) return null;
-    const object = {}
-
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (mission.id || mission._id) {
-                object.id = mission.id || mission._id.toString();
-            }
-            
-            if (mission.missionName) {
-                object.name = mission.missionName;
-            }
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (mission.missionContractor) {
-                object.missionContractor = formatContractor(mission.missionContractor, whoIsDemanding);
-            }
-            if (mission.missionSite) {
-                object.missionSite = formatSite(mission.missionSite, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (mission.__v !== undefined) {
-                object.__v = mission.__v;
-            }
-            
-            if (mission.createdAt) {
-                object.createdAt = mission.createdAt;
-            }
-            
-            if (mission.updatedAt) {
-                object.updatedAt = mission.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting mission:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
-const formatModerator = function (moderator, whoIsDemanding="USER") {
-    if (!moderator) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (moderator.id || moderator._id) {
-                object.id = moderator.id || moderator._id.toString();
-            }
-            
-            object.name = moderator.id || moderator._id.toString();
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (moderator.__v !== undefined) {
-                object.__v = moderator.__v;
-            }
-            
-            if (moderator.createdAt) {
-                object.createdAt = moderator.createdAt;
-            }
-            
-            if (moderator.updatedAt) {
-                object.updatedAt = moderator.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting moderator:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
 const formatNotification = function (notification, whoIsDemanding="USER") {
     if (!notification) return null;
     const object = {}
@@ -590,53 +229,6 @@ const formatNotification = function (notification, whoIsDemanding="USER") {
         }
     } catch (error) {
         console.error(`Error formatting notification:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
-const formatOwnershipShare = function (ownershipShare, whoIsDemanding="USER") {
-    if (!ownershipShare) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (ownershipShare.id || ownershipShare._id) {
-                object.id = ownershipShare.id || ownershipShare._id.toString();
-            }
-            
-            object.name = `Share_${object.id}`
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (ownershipShare.apartment && typeof ownershipShare.apartment === 'object') {
-                object.apartment = formatApartment (ownershipShare.apartment, whoIsDemanding);
-            }
-    
-            if (ownershipShare.owner && typeof ownershipShare.owner === 'object') {
-                object.owner = formatUser(ownershipShare.owner, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (ownershipShare.__v !== undefined) {
-                object.__v = ownershipShare.__v;
-            }
-            
-            if (ownershipShare.createdAt) {
-                object.createdAt = ownershipShare.createdAt;
-            }
-            
-            if (ownershipShare.updatedAt) {
-                object.updatedAt = ownershipShare.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting ownershipShare:`, error);
         return null; // Handle the error as needed
     }
 
@@ -709,55 +301,6 @@ const formatPack = function (pack, whoIsDemanding="USER") {
     return object;
 };
 
-const formatPartiesCommune = function (partiesCommune, whoIsDemanding="USER") {
-    if (!partiesCommune) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (partiesCommune.id || partiesCommune._id) {
-                object.id = partiesCommune.id || partiesCommune._id.toString();
-            }
-            
-            if (partiesCommune.partiesCommuneName) {
-                object.name = partiesCommune.partiesCommuneName;
-            }
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (partiesCommune.partiesCommuneImmeuble) {
-                object.partiesCommuneImmeuble = formatBuilding(partiesCommune.partiesCommuneImmeuble, whoIsDemanding);
-            }
-    
-            if (partiesCommune.partiesCommunePrestataire) {
-                object.partiesCommunePrestataire = formatContractor (partiesCommune.partiesCommunePrestataire, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (partiesCommune.__v !== undefined) {
-                object.__v = partiesCommune.__v;
-            }
-            
-            if (partiesCommune.createdAt) {
-                object.createdAt = partiesCommune.createdAt;
-            }
-            
-            if (partiesCommune.updatedAt) {
-                object.updatedAt = partiesCommune.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting partiesCommune:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
 const formatPermission = function (permissions, whoIsDemanding="USER") {
     if (!Array.isArray(permissions)) {
         console.error("Input is not an array");
@@ -801,83 +344,6 @@ const formatPermission = function (permissions, whoIsDemanding="USER") {
 
         return object;
     });
-};
-
-const formatPrestataire = function (prestataire, whoIsDemanding="USER") {
-    if (!prestataire) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (prestataire.id || prestataire._id) {
-                object.id = prestataire.id || prestataire._id.toString();
-            }
-            
-            object.name = prestataire.id || prestataire._id.toString();
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (prestataire.__v !== undefined) {
-                object.__v = prestataire.__v;
-            }
-            
-            if (prestataire.createdAt) {
-                object.createdAt = prestataire.createdAt;
-            }
-            
-            if (prestataire.updatedAt) {
-                object.updatedAt = prestataire.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting prestataire:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
-const formatReserveFund = function (reserveFund, whoIsDemanding="USER", perspective = 'USER') {
-    if (!reserveFund) {
-        return null;
-    }
-
-    // Use toJSON if available (Mongoose object), otherwise handle plain object
-    let baseObject;
-    if (typeof reserveFund.toJSON === 'function') {
-        baseObject = reserveFund.toJSON();
-    } else {
-        const { _id, ...rest } = reserveFund;
-        baseObject = { id: _id?.toString() || reserveFund.id, ...rest };
-    }
-
-    // Core fields
-    const formatted = {
-        id: baseObject.id,
-        agreement: baseObject.agreement,
-        currentBalance: baseObject.currentBalance,
-        transactions: baseObject.transactions?.map((transaction) => ({
-            id: transaction._id?.toString(),
-            type: transaction.type,
-            amount: transaction.amount,
-            description: transaction.description,
-            reference: transaction.reference,
-            refModel: transaction.refModel,
-            date: transaction.date,
-        })),
-        createdAt: baseObject.createdAt,
-        updatedAt: baseObject.updatedAt,
-    };
-
-    // Perspective-based adjustments
-    if (perspective === 'ADMIN') {
-        // Admins might see additional fields if needed
-        formatted.transactions = baseObject.transactions;
-    }
-
-    return formatted;
 };
 
 const formatRole = function (roles, whoIsDemanding="USER") {
@@ -968,109 +434,6 @@ const formatRole = function (roles, whoIsDemanding="USER") {
     });
 };
 
-const formatServiceRequest = function (serviceRequest, whoIsDemanding="USER") {
-    if (!serviceRequest) return null;
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (serviceRequest.id || serviceRequest._id) {
-                object.id = serviceRequest.id || serviceRequest._id.toString();
-            }
-            
-            object.name = serviceRequest.id || serviceRequest._id.toString();
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (serviceRequest.serviceRequestUser) {
-                object.serviceRequestUser = formatUser(serviceRequest.serviceRequestUser, whoIsDemanding);
-            }
-    
-            if (serviceRequest.serviceRequestMission) {
-                object.serviceRequestMission = formatMission (serviceRequest.serviceRequestMission, whoIsDemanding);
-            }
-    
-            if (serviceRequest.serviceRequestSite) {
-                object.serviceRequestSite = formatSite(serviceRequest.serviceRequestSite, whoIsDemanding);
-            }
-    
-            if (serviceRequest.assignedContractor) {
-                object.assignedContractor = formatContractor(serviceRequest.assignedContractor, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (serviceRequest.relatedDevis) {
-                object.relatedDevis = formatDevis(serviceRequest.relatedDevis, whoIsDemanding);
-            }
-
-            if (serviceRequest.__v !== undefined) {
-                object.__v = serviceRequest.__v;
-            }
-            
-            if (serviceRequest.createdAt) {
-                object.createdAt = serviceRequest.createdAt;
-            }
-            
-            if (serviceRequest.updatedAt) {
-                object.updatedAt = serviceRequest.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting serviceRequest:`, error);
-        return null; // Handle the error as needed
-    }
-
-    return object;
-};
-
-const formatService = function (service, whoIsDemanding="USER") {
-    if (!service) return null;
-
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (service.id || service._id) {
-                object.id = service.id || service._id.toString();
-            }
-            
-            object.name = service.servicesName;
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (service.servicesProvider) {
-                object.servicesProvider = formatContractor(service.servicesProvider, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (service.__v !== undefined) {
-                object.__v = service.__v;
-            }
-            
-            if (service.createdAt) {
-                object.createdAt = service.createdAt;
-            }
-            
-            if (service.updatedAt) {
-                object.updatedAt = service.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error(`Error formatting service:`, error);
-        return null;
-    }
-
-    return object;
-};
-
 const formatSession = function (mission, whoIsDemanding="USER") {
     if (!session) return null;
     const object = {}
@@ -1108,52 +471,6 @@ const formatSession = function (mission, whoIsDemanding="USER") {
         }
     } catch (error) {
         console.error(`Error formatting session:`, error);
-        return null;
-    }
-
-    return object;
-};
-
-const formatSite = function (site, whoIsDemanding="USER") {
-    if (!site) return null;
-
-    const object = {}
-    
-    try {
-        // Basic info for all users
-        if(['USER', 'MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (site._id) {
-                object.id = site._id.toString();
-            }
-            
-            if (site.siteName) {
-                object.name = site.siteName;
-            }
-        }
-
-        // Additional info for managers and admins
-        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
-            if (site.siteContract) {
-                object.siteContract = formatContract(site.siteContract, whoIsDemanding);
-            }
-        }
-
-        // Sensitive info for admins only
-        if(['ADMIN'].includes(whoIsDemanding)) {
-            if (site.__v !== undefined) {
-                object.__v = site.__v;
-            }
-            
-            if (site.createdAt) {
-                object.createdAt = site.createdAt;
-            }
-            
-            if (site.updatedAt) {
-                object.updatedAt = site.updatedAt;
-            }
-        }
-    } catch (error) {
-        console.error("Error formatting site:", error);
         return null;
     }
 
@@ -1298,6 +615,19 @@ const formatTwoFA = function (twoFA, whoIsDemanding="USER") {
             if (twoFA.twoFAUser && typeof twoFA.twoFAUser === 'object') {
                 object.twoFAUser = formatUser(twoFA.twoFAUser, whoIsDemanding);
             }
+
+            if (twoFA.twoFAStatus) {
+                object.twoFAStatus = twoFA.twoFAStatus;
+            }
+
+            if (twoFA.twoFAPassCode && Array.isArray(twoFA.twoFAPassCode)) {
+                object.twoFAPassCode = twoFA.twoFAPassCode.map(code => {
+                    return {
+                        passCodeSecret: code.passCodeSecret,
+                        passCodeExpiresAt: code.passCodeExpiresAt,
+                    }
+                });
+            }
         }
 
         // Sensitive info for admins only
@@ -1368,27 +698,13 @@ const formatUser = function (user, whoIsDemanding="USER") {
 // Export all functions
 module.exports = {
     formatAgreement,
-    formatApartment,
-    formatBuilding,
     formatContractor,
     formatContract,
-    formatCotisation,
-    formatDepense,
-    formatDevis,
-    formatMission,
-    formatModerator,
     formatNotification,
-    formatOwnershipShare,
     formatPack,
-    formatPartiesCommune,
     formatPermission,
-    formatPrestataire,
-    formatReserveFund,
     formatRole,
-    formatServiceRequest,
-    formatService,
     formatSession,
-    formatSite,
     formatStaff,
     formatTask,
     formatTwoFA,

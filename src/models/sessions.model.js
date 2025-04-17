@@ -25,13 +25,13 @@ const sessionSchema = new Schema(
 // --- Instance Methods ---
 
 // Custom toJSON method
-sessionSchema.method("toJSON", function () {
+sessionSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatSession(object);
+  return formatSession(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method
-sessionSchema.method("populateAndTransform", async function () {
+sessionSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
   // Populate user if not already done
   const populatePaths = [
       populationSettingsContractors('userId', 'USER'), // Populate assignedContractor with specific fields
@@ -41,7 +41,7 @@ sessionSchema.method("populateAndTransform", async function () {
       await this.populate(populatePaths[0]).execPopulate();
     }
 
-  return this.toJSON();
+  return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
@@ -54,7 +54,7 @@ sessionSchema.statics.FindActiveSessions = async function (userId) { // Renamed 
     return sessions.map(session => session.toJSON());
     // Or use populateAndTransform if needed:
     // const populatedSessions = await Promise.all(
-    //   sessions.map((session) => session.populateAndTransform())
+    //   sessions.map((session) => session.populateAndTransform(whoIsDemanding))
     // );
     // return populatedSessions;
   } catch (error) {
@@ -64,7 +64,7 @@ sessionSchema.statics.FindActiveSessions = async function (userId) { // Renamed 
 };
 
 // Added standard Count static method
-sessionSchema.statics.Count = async function (filter = {}, limit = 10) {
+sessionSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     // Count usually doesn't need population
     const count = await this.countDocuments(filter);

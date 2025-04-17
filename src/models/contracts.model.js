@@ -20,13 +20,13 @@ const contractsSchema = new Schema({
 // --- Instance Methods ---
 
 // Custom toJSON method to modify the response structure
-contractsSchema.method("toJSON", function () {
+contractsSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatContract(object);
+  return formatContract(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method for custom populated structure
-contractsSchema.method("populateAndTransform", async function () {
+contractsSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
   
   const populatePaths = [
     populationSettingsUsers('contractUser', 'USER'), // Populate contractUser with specific fields
@@ -43,20 +43,20 @@ contractsSchema.method("populateAndTransform", async function () {
     await this.populate(populatePaths[1]).execPopulate();
   }
 
-  return this.toJSON();
+  return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
 
 // Static method to count records by contractor and limit
-contractsSchema.statics.Count = async function (filter = {}, limit = 10) {
+contractsSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     const documents = await this.find(filter).limit(limit);
     // Decide whether to return raw docs, toJSON docs, or fully transformed docs
     // Using populateAndTransform here can be slow for lists. Consider toJSON only.
     const populated = await Promise.all(documents.map(doc =>
         // doc.toJSON() // Using simpler toJSON for lists might be more performant
-        doc.populateAndTransform() // Use this if the full transformation is always needed
+        doc.populateAndTransform(whoIsDemanding) // Use this if the full transformation is always needed
     ));
     return populated;
   } catch (error) {

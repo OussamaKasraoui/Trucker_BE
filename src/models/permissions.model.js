@@ -20,23 +20,23 @@ PermissionSchema.index({ permissionContext: 1, permissionAction: 1 });
 
 // --- Instance Methods ---
 
-PermissionSchema.method("toJSON", function () {
+PermissionSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatPermission(object);
+  return formatPermission(object, whoIsDemanding);
 });
 
-PermissionSchema.method("populateAndTransform", async function () {
+PermissionSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
     // No population needed based on current schema refs
-    return this.toJSON();
+    return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
 
-PermissionSchema.statics.Count = async function (filter = {}, limit = 100) { // Higher limit for permissions?
+PermissionSchema.statics.Count = async function (filter = {}, limit = 100, whoIsDemanding = 'USER') { // Higher limit for permissions?
   try {
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

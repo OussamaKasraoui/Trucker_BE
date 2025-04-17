@@ -26,13 +26,13 @@ const twoFASchema = new Schema(
 // --- Instance Methods ---
 
 // Custom toJSON method to modify the response structure
-twoFASchema.method("toJSON", function () {
+twoFASchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatTwoFA(object);
+  return formatTwoFA(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method to handle population
-twoFASchema.method("populateAndTransform", async function () {
+twoFASchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
   // Populate user if not already done
   const populatePaths = [
     populationSettingsUsers('twoFAUser', 'USER'), // Populate taskStuff with specific fields
@@ -42,17 +42,17 @@ twoFASchema.method("populateAndTransform", async function () {
     await this.populate(populatePaths[0]).execPopulate();
   }
 
-  return this.toJSON();
+  return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
 
 // Static method for counting TwoFA entries
-twoFASchema.statics.Count = async function (filter = {}, limit = 10) {
+twoFASchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

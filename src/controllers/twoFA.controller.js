@@ -90,8 +90,9 @@ exports.verify = async function (req, res) {
   try {
     const userId = req.body.formData.twoFAUser
     const secret = req.body.formData.secret
+    const whoIsDemanding = userId === req.decoded.id ? "MANAGER" : "USER"
 
-    const twoFADocResult = await TwoFAHelpers.findById(userId);
+    const twoFADocResult = await TwoFAHelpers.findById(userId, whoIsDemanding); 
     
     // Handle TwoFA creation errors
     if (twoFADocResult.error) {
@@ -134,7 +135,7 @@ exports.verify = async function (req, res) {
     }
 
     // Create TwoFA using the helper function
-    const twoFAActivationResult = await TwoFAHelpers.verify(userId);
+    const twoFAActivationResult = await TwoFAHelpers.verify(userId, whoIsDemanding);
 
     // Handle TwoFA creation errors
     if (twoFAActivationResult.error) {
@@ -142,7 +143,7 @@ exports.verify = async function (req, res) {
     }  
 
     // // set userStatus & ContractStatus to OnHold
-    const userResult = await UserHelpers.update(userId, { userStatus: 'OnHold' }, false);
+    const userResult = await UserHelpers.update(userId, { userStatus: 'OnHold' }, false, whoIsDemanding);
     // const contractResult = await ContractHelpers.update(userId, { contractStatus: 'OnHold' }, false);
 
     // Handle user errors
@@ -152,7 +153,7 @@ exports.verify = async function (req, res) {
     const user = userResult.payload
 
     // Generate a new Token
-    const tokenizeResult = await UserHelpers.tokenize(user, false)
+    const tokenizeResult = await UserHelpers.tokenize(user, whoIsDemanding);
     
     // Handle Token creation errors
     if (tokenizeResult.error) {
@@ -219,15 +220,8 @@ exports.resend = async function (req, res) {
   try {
       const userId = req.query.twoFAUser;
 
-      // Optional: Fetch user details if needed for email recipient, etc.
-      // const userResult = await UserHelpers.findById(userId);
-      // if (userResult.error) {
-      //   return res.status(userResult.code).json({ error: true, message: "User not found", data: userResult.payload });
-      // }
-      // const user = userResult.payload; // Assuming payload is the user object
-
       // Call the helper function to update the TwoFA document
-      const twoFAUpdateResult = await TwoFAHelpers.resend(userId);
+      const twoFAUpdateResult = await TwoFAHelpers.resend(userId, userId === req.decoded.id ? "MANAGER" : "USER"); 
 
       // *** ADD CHECK HERE: Handle errors from the helper function ***
       if (twoFAUpdateResult.error) {

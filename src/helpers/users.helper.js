@@ -210,7 +210,7 @@ exports.create = async function (users, login) {
   }
 };
 
-exports.findById = async function (id) {
+exports.findById = async function (id, whoIsDemanding = 'USER') {
   let returnUser = {
     error: false,
     payload: null,
@@ -236,7 +236,7 @@ exports.findById = async function (id) {
       returnUser.code = 403;  // Not found
     } else {
       // Populate and transform the found user
-      const populatedUser = await foundUser.populateAndTransform(false);
+      const populatedUser = await foundUser.populateAndTransform(whoIsDemanding);
 
       // Return populated user data if available
       returnUser.payload = populatedUser;
@@ -346,7 +346,7 @@ exports.findOne = async function (query, sensitive = false) {
     });
 }; */
 
-exports.update = async function (id, updateData, login) {
+exports.update = async function (id, updateData, login, whoIsDemanding = 'USER') {
   let returnUser = {
     error: false,
     payload: null,
@@ -385,7 +385,7 @@ exports.update = async function (id, updateData, login) {
     }
 
     // Populate and transform the updated user
-    const populatedUser = await updatedUser.populateAndTransform(login);
+    const populatedUser = await updatedUser.populateAndTransform(whoIsDemanding);
 
     // Return populated user
     returnUser.payload = populatedUser;
@@ -438,8 +438,7 @@ exports.tokenize = async function (user, whoIsDemanding = 'USER') {
     }
     else {
       delete user.userPassword
-      delete user.createdAt
-      delete user.updatedAt
+      delete user.userRoles
 
       tokenize.pack = user.userPack;
       tokenize.id = user.id; /* Todo:   replace with ID of login ( add Login/Activity collection to track user )*/
@@ -452,6 +451,7 @@ exports.tokenize = async function (user, whoIsDemanding = 'USER') {
     if (contractor.error) {
       tokenize.contractor = {};
     } else {
+      delete contractor.payload.contractorRoles // TODO:deal with this later
       tokenize.contractor = contractor.payload;
     }
 
@@ -461,6 +461,7 @@ exports.tokenize = async function (user, whoIsDemanding = 'USER') {
     if (staff.error) {
       tokenize.staff = {}
     } else {
+      delete staff.payload.staffRoles // TODO:deal with this later
       tokenize.staff = staff.payload;
     }
 
@@ -600,7 +601,7 @@ exports.login = async function (formData, res) {
   }
 };
 
-exports.check = async function (req, res) {
+exports.check = async function (req, whoIsDemanding = 'USER') {
   let returnResult = {
     error: false,
     payload: null,
@@ -618,7 +619,7 @@ exports.check = async function (req, res) {
   try {
 
     // Find User by ID
-    const userResult = await exports.findById(req.decoded.id);
+    const userResult = await exports.findById(req.decoded.id, whoIsDemanding);
 
     // Handle errors in finding user
     if (userResult.error) {
@@ -673,7 +674,7 @@ exports.check = async function (req, res) {
 
       let resData = req.decoded      
 
-      const [ defaultUserStatus, defaultUserStatusPayload, defaultUser ] = await exports.checkStatus(user, contractor, staff)
+      const [ defaultUserStatus, defaultUserStatusPayload, defaultUser ] = await exports.checkStatus(user, contractor, staff, whoIsDemanding)
 
       if(defaultUserStatus !== user.userStatus) {
         
@@ -717,47 +718,10 @@ exports.check = async function (req, res) {
               return this.display.every(displ => displ.done === true);
             },
           },
-
-          /* {
-            name: "UserProfile",
-            context: "information",
-            display: [{
-              name: `UserProfile`,
-              context: 'users',
-              information: {
-                context: "users",
-                title: `UserProfileCreatedTitle`,
-                header: `UserProfileCreatedHeader`,
-                body: `UserProfileCreatedBody`,
-                footer: `UserProfileCreatedFooter`,
-              },
-
-              values: [],
-              bulk: false,
-              dependency: { packs: [{id: packId, name: packName}] },
-              done: true,
-              action: ["check"], // "next"
-            }],
-            information: {
-              action: ["check"],
-              done: true,
-              context: "users",
-
-              title: `UserProfileCreatedTitle`,
-              header: `UserProfileCreatedHeader`,
-              body: `UserProfileCreatedBody`,
-              footer: `UserProfileCreatedFooter`,
-            },
-            get done (){
-              const isDone =  this.display.every(displ => displ.done === true);
-
-              return isDone
-            },
-          } */
         ],
 
         onHold: [
-          {
+          /* {
             name: "Site Setup",
             context: "sites",
             display: [{
@@ -825,7 +789,7 @@ exports.check = async function (req, res) {
             get done() {
               return this.display.every(displ => displ.done === true);
             },
-          },
+          }, */
         ],
         
         Active: [
@@ -2137,7 +2101,7 @@ exports.check = async function (req, res) {
             resData.redirect = {
               replace: true,
               redirect: true,
-              to: `/welcome`.toLowerCase(),
+              to: `/${user.userPack.packName}/dashboard`.toLowerCase(),
               data: [],
             }
 
@@ -2154,7 +2118,7 @@ exports.check = async function (req, res) {
             resData.redirect = {
               replace: true,
               redirect: true,
-              to: `/${"dashboard"}`.toLowerCase(),
+              to: `/${user.userPack.packName}/dashboard`.toLowerCase(),
               data: [],
             }
 
@@ -2411,7 +2375,7 @@ exports.shouldRedirect = function (commingFrom, whereToGo){
 
 }
 
-exports.checkStatus = async function (_user, contractor, staff) {
+exports.checkStatus = async function (_user, contractor, staff, whoIsDemanding = 'USER') {
   let user = _user
   let defaultUserStatus = undefined;
   let defaultUserStatusPayload = undefined;
@@ -2419,7 +2383,7 @@ exports.checkStatus = async function (_user, contractor, staff) {
   let defaultContractStatus = undefined;
 
   // grab: "* Status Requirments" : [Contracts]
-  const existContracts = await Count(Contract, { "contractContractors": contractor.id }, user.userPack.packOptions.contracts)
+  const existContracts = await Count(Contract, { "contractContractors": contractor.id }, user.userPack.packOptions.contracts, whoIsDemanding)
 
   
   // at this point User status should be "Suspended"
@@ -2432,11 +2396,11 @@ exports.checkStatus = async function (_user, contractor, staff) {
   // at this point User status should be 'OnHold', 'Active', 'Inactive'
   else {
 
+    const [contractStatus, contractPayload] = await ContractHelpers.checkStatus(existContracts[0], user, contractor, staff, whoIsDemanding)
+
     switch (user.userPack.packName) {
 
       case 'Syndicate':      
-
-        const [ contractStatus, contractPayload ] = await ContractHelpers.checkStatus(existContracts[0], user, contractor, staff)
 
         if( contractStatus !== user.userStatus && !['Inactive', 'Completed', 'Stopped'].includes(contractStatus) ){
           

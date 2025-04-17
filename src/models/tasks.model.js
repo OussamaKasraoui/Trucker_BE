@@ -32,12 +32,12 @@ const tasksSchema = Schema(
 
 // --- Instance Methods ---
 
-tasksSchema.method("toJSON", function () {
+tasksSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatTask(object);
+  return formatTask(object, whoIsDemanding);
 });
 
-tasksSchema.method("populateAndTransform", async function () {
+tasksSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
     const pathsToPopulate = [
       populationSettingsUsers('taskNotes.author', 'USER'), // Populate taskStuff with specific fields
       populationSettingsUsers('taskStuff', 'USER'), // Populate taskStuff with specific fields
@@ -69,16 +69,16 @@ tasksSchema.method("populateAndTransform", async function () {
       }
       
 
-    return this.toJSON();
+    return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
 
-tasksSchema.statics.Count = async function (filter = {}, limit = 10) {
+tasksSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

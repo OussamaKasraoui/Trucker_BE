@@ -66,9 +66,9 @@ agreementsSchema.pre('save', function(next) {
 // --- Instance Methods ---
 
 // Custom toJSON method (simplified, relies on populateAndTransform for complex formatting)
-agreementsSchema.method("toJSON", function () {
+agreementsSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatAgreement(object);
+  return formatAgreement(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method (kept complex population logic)
@@ -116,13 +116,13 @@ agreementsSchema.method('populateAndTransform', async function () {
       await this.populate(populatePaths[7]).execPopulate();
     }
 
-    return this.toJSON();
+    return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
 
 // Static method for counting and populating Agreements (using populateAndTransform)
-agreementsSchema.statics.Count = async function (filter = {}, limit = null) { // Added defaults
+agreementsSchema.statics.Count = async function (filter = {}, limit = null, whoIsDemanding = 'USER') { // Added defaults
   try {
     const query = this.find(filter);
     if (limit !== null) {
@@ -132,7 +132,7 @@ agreementsSchema.statics.Count = async function (filter = {}, limit = null) { //
 
     // Use populateAndTransform for each agreement
     const populatedAgreements = await Promise.all(
-        agreements.map(agreement => agreement.populateAndTransform())
+        agreements.map(agreement => agreement.populateAndTransform(whoIsDemanding))
     );
 
     return populatedAgreements;

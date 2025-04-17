@@ -53,12 +53,12 @@ contractorsSchema.method("populateAndTransform", async function (whoIsDemanding 
 // --- Static Methods ---
 
 // Static method to count records by status and limit
-contractorsSchema.statics.Count = async function (filter = {}, limit = 10) {
+contractorsSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     const documents = await this.find(filter).limit(limit);
     // Populate and transform each document
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform()
+      doc.populateAndTransform(whoIsDemanding)
     ));
     return populated;
   } catch (error) {

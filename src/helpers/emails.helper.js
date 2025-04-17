@@ -54,7 +54,7 @@ exports.create = async function (emailData, session) {
     const /* newEmail */ populatedEmail = await Email.create(emailObject, session ? { session } : undefined);
 
     // Populate and transform the result
-    //const populatedEmail = await newEmail.populateAndTransform();
+    //const populatedEmail = await newEmail.populateAndTransform(whoIsDemanding);
 
     // Check if the document was created successfully
     if (!populatedEmail) {

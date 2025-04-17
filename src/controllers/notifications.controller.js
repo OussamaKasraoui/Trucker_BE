@@ -396,7 +396,7 @@ exports.findById = async (req, res) => {
         }
 
         // Use populateAndTransform or just toJSON depending on needs
-        // const transformedData = await notification.populateAndTransform(); // If complex transform needed
+        // const transformedData = await notification.populateAndTransform(whoIsDemanding); // If complex transform needed
         const transformedData = notification.toJSON(); // Use standard toJSON
 
         return res.status(200).json({

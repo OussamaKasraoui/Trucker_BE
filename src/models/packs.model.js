@@ -47,7 +47,7 @@ PackSchema.method("populateAndTransform", function (whoIsDemanding="USER") {
 // --- Static Methods ---
 
 // Added Count static method
-PackSchema.statics.Count = async function (filter = {}, limit = 10) {
+PackSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>

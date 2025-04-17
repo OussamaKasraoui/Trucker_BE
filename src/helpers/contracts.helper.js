@@ -34,7 +34,7 @@ exports.create = async function (contracts) {
                 // Create new contract document
                 const docContract = await Contract.create(contract);
 
-                results.push({ code: 201, error: false, data: await docContract.populateAndTransform() });
+                results.push({ code: 201, error: false, data: await docContract.populateAndTransform(whoIsDemanding) });
 
             } catch (error) {
                 console.error("Error creating contract:", error);
@@ -96,7 +96,7 @@ exports.create = async function (contracts) {
     return returnContract;
 };
 
-exports.findAll = async function (contractors, pack) {
+exports.findAll = async function (contractors, pack, whoIsDemanding = 'USER') {
     let returnContracts = {
         error: false,
         payload: null,
@@ -112,7 +112,8 @@ exports.findAll = async function (contractors, pack) {
                     "$in": contractors
                 }
             },
-            pack.packOptions?.sites
+            pack.packOptions?.sites,
+            whoIsDemanding
         )
 
         if (!contracts || contracts.length === 0) {
@@ -245,13 +246,13 @@ exports.delete = async function (id) {
     return returnContext;
 };
 
-exports.checkStatus = async function (Contract, user, contractor, staff) {
+exports.checkStatus = async function (Contract, user, contractor, staff, whoIsDemanding = 'USER') {
 
     let contract = Contract;
     let defaultContractStatus = undefined;
     
     // grab: "Pending Status Requirments" : [TwoFAs]
-    const existTwoFAs =     await Count(TwoFAs,     { "twoFAUser":         user.id },     user.userPack.packOptions.agreements || 0)
+    const existTwoFAs =     await Count(TwoFAs, { "twoFAUser": user.id }, user.userPack.packOptions.agreements || 0, whoIsDemanding)
             
     // // grab: "OnHold Status Requirments" : [Sites, Buildings, Apartments]
     // const existSites =      await Count(Site,       { "siteContract":      contract.id }, user.userPack.packOptions.agreements || 0)
@@ -298,7 +299,8 @@ exports.checkStatus = async function (Contract, user, contractor, staff) {
         if( defaultContractStatus !== contract.contractStatus &&
             !['Inactive', 'Completed', 'Stopped'].includes(contract.contractStatus)
         ){
-            const contractUpdated = await ContractHelpers.update(user.id, { contractStatus: defaultContractStatus }, false);
+            // const contractUpdated = await exports.update(user.id, { contractStatus: defaultContractStatus }, false);
+            const contractUpdated = await exports.update(user.id, { contractStatus: defaultContractStatus }, false);
 
             if (contractUpdated.error || !contractUpdated.payload) {
                 
@@ -355,7 +357,7 @@ exports.checkStatus = async function (Contract, user, contractor, staff) {
             if( defaultContractStatus !== contract.contractStatus &&
                 !['Inactive', 'Completed', 'Stopped'].includes(contract.contractStatus)
             ){
-                const contractUpdated = await ContractHelpers.update(user.id, { contractStatus: defaultContractStatus }, false);
+                const contractUpdated = await exports.update(user.id, { contractStatus: defaultContractStatus }, false);
 
                 if (contractUpdated.error || !contractUpdated.payload) {
                     
@@ -413,7 +415,7 @@ exports.checkStatus = async function (Contract, user, contractor, staff) {
         if( defaultContractStatus !== contract.contractStatus &&
             !['Inactive', 'Completed', 'Stopped'].includes(contract.contractStatus)
         ){
-            const contractUpdated = await ContractHelpers.update(user.id, { contractStatus: defaultContractStatus }, false);
+            const contractUpdated = await exports.update(user.id, { contractStatus: defaultContractStatus }, false);
 
             if (contractUpdated.error || !contractUpdated.payload) {
                 
@@ -439,12 +441,12 @@ exports.checkStatus = async function (Contract, user, contractor, staff) {
     return [
         defaultContractStatus,
         {
-            existSites,
-            existBuildings,
-            existApartments,
+            // existSites,
+            // existBuildings,
+            // existApartments,
 
             existContracts: [ contract ],
-            existAgreements,
+            // existAgreements,
         }
     ];
 

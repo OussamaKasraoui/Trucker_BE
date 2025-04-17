@@ -25,7 +25,7 @@ exports.create = async function (notifications, session) {
     const docNotification = await Notification.create(notifications, session ? { session } : undefined);
 
     // Push success result after transformation
-    results.push({ code: 201, error: false, data: await docNotification.populateAndTransform() });
+    results.push({ code: 201, error: false, data: await docNotification.populateAndTransform(whoIsDemanding) });
 
   } catch (error) {
     console.error("Error creating notification:", error);

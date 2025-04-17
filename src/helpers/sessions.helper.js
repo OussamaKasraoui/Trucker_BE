@@ -20,7 +20,7 @@ exports.createSession = async function (userId, ipAddress, deviceInfo) {
         // Save the session to the database
         const savedSession = await newSession.save();
 
-        returnSession.payload = await savedSession.populateAndTransform(); // Populate and transform data
+        returnSession.payload = await savedSession.populateAndTransform(whoIsDemanding); // Populate and transform data
         return returnSession;
     } catch (err) {
         console.error("Error creating session:", err);
@@ -38,7 +38,7 @@ exports.getSessionHistory = async function (userId) {
 
         // Transform each session's data before returning
         const transformedSessions = await Promise.all(
-            sessions.map((session) => session.populateAndTransform())
+            sessions.map((session) => session.populateAndTransform(whoIsDemanding))
         );
 
         return transformedSessions;

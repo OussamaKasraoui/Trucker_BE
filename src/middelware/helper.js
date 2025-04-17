@@ -1,8 +1,8 @@
 const Notification = require('./../models/notifications.model')
 
-async function Count(Model, condition, limit) {
+async function Count(Model, condition, limit, whoIsDemanding = 'USER') {
     try {
-        return Model.Count(condition, limit);
+        return Model.Count(condition, limit, whoIsDemanding);
     } catch (err) {
         return err;
     }

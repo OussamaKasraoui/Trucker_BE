@@ -22,14 +22,14 @@ const notificationSchema = new Schema( // Use Schema constructor
 
 // --- Instance Methods ---
 
-notificationSchema.method("toJSON", function () {
+notificationSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
   
-  return formatNotification(object);
+  return formatNotification(object, whoIsDemanding);
 });
 
 // Added populateAndTransform
-notificationSchema.method("populateAndTransform", async function () {
+notificationSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
     const populatePaths = [
         populationSettingsUsers('notificationCreator', 'USER'), // Populate notificationCreator with specific fields
         // populationSettingsUsers('notificationTarget.targetUser', 'USER'), // Populate targetUser with specific fields
@@ -46,7 +46,7 @@ notificationSchema.method("populateAndTransform", async function () {
     // }
 
 
-    return this.toJSON();
+    return this.toJSON(whoIsDemanding);
 });
 
 
@@ -123,14 +123,14 @@ notificationSchema.statics.unsubscribeNotifications = async function(notificatio
 }
 
 // Added standard Count static method
-notificationSchema.statics.Count = async function (filter = {}, limit = 10) {
+notificationSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     // Count typically doesn't need population/transformation
     // const count = await this.countDocuments(filter);
     // If you need the documents:
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

@@ -25,31 +25,31 @@ const emailSchema = new Schema(
 // --- Instance Methods ---
 
 // Custom toJSON method to modify the response structure
-emailSchema.method("toJSON", function () {
+emailSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
   return object  //formatEmail(object);
 });
 
 // Custom populateAndTransform method - No refs to populate in this schema currently
-emailSchema.method("populateAndTransform", async function () {
+emailSchema.method("populateAndTransform", async function(whoIsDemanding = 'USER') {
   // No population needed based on current schema refs
   // If refs were added (e.g., to a User who triggered the email), populate here:
   // if (!this.populated('triggeringUser')) {
   //     await this.populate({ path: 'triggeringUser', select: 'userEmail' });
   // }
-  return this.toJSON(); // Return the transformed document
+  return this.toJSON(whoIsDemanding); // Return the transformed document
 });
 
 // --- Static Methods ---
 
 // Static method for counting and retrieving emails
-emailSchema.statics.Count = async function (filter = {}, limit = 10) {
+emailSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') {
   try {
     // Fetch emails based on filter and limit
     const emails = await this.find(filter).limit(limit).sort({ createdAt: -1 }); // Example sort
     // Use toJSON for each email as populateAndTransform is basic here
     const populated = await Promise.all(emails.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

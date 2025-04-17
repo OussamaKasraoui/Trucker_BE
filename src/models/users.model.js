@@ -112,11 +112,11 @@ usersSchema.method("populateAndTransform", async function (whoIsDemanding = 'USE
 // --- Static Methods ---
 
 // Static method to count records by criteria
-usersSchema.statics.Count = async function (filter = {}, limit = 10) { // Made async
+usersSchema.statics.Count = async function (filter = {}, limit = 10, whoIsDemanding = 'USER') { // Made async
   try {
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {
