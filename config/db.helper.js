@@ -364,566 +364,68 @@ const createInitialData = async () => {
  * @param {object} adminUserData - The user object for the admin (used for referencing).
  * @returns {Promise<void>}
  */
-// const populateDatabaseWithSampleData = async (packId, adminUserData) => {
-//   console.log("\n--- Starting Database Population with Sample Data ---");
-//   if (!packId || !adminUserData || !adminUserData.id) {
-//       console.warn("Skipping sample data population: Missing packId or adminUserData.");
-//       return;
-//   }
+const populateDatabaseWithSampleData = async (packId, adminUserData) => {
+  console.log("\n--- Starting Database Population with Sample Data ---");
+  if (!packId || !adminUserData || !adminUserData.id) {
+      console.warn("Skipping sample data population: Missing packId or adminUserData.");
+      return;
+  }
 
-//   try {
-//     // 1. Create Users (using faker)
-//     console.log("Creating Sample Users...");
-//     const usersData = Array.from({ length: 5 }).map((item, index) => ({
-//       userFirstName: faker.person.firstName(),
-//       userLastName: faker.person.lastName(),
-//       userAddress: faker.location.streetAddress(),
-//       userPhone: faker.phone.number(),
-//       userEmail: `user${index + 1}@email.com`,//faker.internet.email({ provider: 'sample.local' }), // Unique emails
-//       userPassword: "password123", // Use env var ideally
-//       userPack: packId,
-//       userStatus: "Active",
-//       // userRef: { // Reference the admin user who initiated seeding
-//       //   referrer: adminUserData.id,
-//       //   reference: {
-//       //     id: adminUserData.id,
-//       //     name: `${adminUserData.userFirstName} ${adminUserData.userLastName}`,
-//       //     type: "User"
-//       //   }
-//       // },
-//       userRoles: [] // Assign roles later if needed
-//     }));
+  try {
+    // 1. Create Users (using faker)
+    console.log("Creating Sample Users...");
+    const usersData = Array.from({ length: 5 }).map((item, index) => ({
+      userFirstName: faker.person.firstName(),
+      userLastName: faker.person.lastName(),
+      userAddress: faker.location.streetAddress(),
+      userPhone: faker.phone.number(),
+      userEmail: faker.internet.email({ provider: 'email.com' }), // Unique emails // `user${index + 1}@email.com`,//
+      userPassword: "password123", // Use env var ideally
+      userPack: packId,
+      userStatus: "Active",
+      userRoles: [] // Assign roles later if needed
+    }));
 
-//     // --- Add Log Here ---
-//     console.log('[PopulateDB] Sample users data before creation:', JSON.stringify(usersData, null, 2));
-//     // --- End Log ---
+    // --- Add Log Here ---
+    console.log('[PopulateDB] Sample users data before creation:', JSON.stringify(usersData, null, 2));
+    // --- End Log ---
 
-//     const usersCreationResults = await UserHelpers.create(usersData);
-//     if (usersCreationResults.error || !usersCreationResults.payload) {
-//       throw new Error(`Error creating sample users: ${JSON.stringify(usersCreationResults.payload)}`);
-//     }
-//     // Extract the composite data for each created user
-//     const createdUsersComposite = usersCreationResults.payload.map(result => result.data);
-//     console.log(`Created ${createdUsersComposite.length} sample users.`);
+    const usersCreationResults = await UserHelpers.create(usersData);
+    if (usersCreationResults.error || !usersCreationResults.payload) {
+      throw new Error(`Error creating sample users: ${JSON.stringify(usersCreationResults.payload)}`);
+    }
+    // Extract the composite data for each created user
+    const createdUsersComposite = usersCreationResults.payload.map(result => result.data);
+    console.log(`Created ${createdUsersComposite.length} sample users.`);
 
-//     // Helper to safely get IDs/Objects
-//     const getUserData = (index) => {
-//         if (index < 0 || index >= createdUsersComposite.length || !createdUsersComposite[index]) return null;
-//         const composite = createdUsersComposite[index];
-//         return {
-//             user: composite.userCreation?.[0],
-//             contractor: composite.contractorCreation?.[0],
-//             staff: composite.staffCreation?.[0],
-//             contract: composite.contractCreation?.[0],
-//         };
-//     };
+    // Helper to safely get IDs/Objects
+    const getUserData = (index) => {
+        if (index < 0 || index >= createdUsersComposite.length || !createdUsersComposite[index]) return null;
+        const composite = createdUsersComposite[index];
+        return {
+            user: composite.userCreation?.[0],
+            contractor: composite.contractorCreation?.[0],
+            staff: composite.staffCreation?.[0],
+            contract: composite.contractCreation?.[0],
+        };
+    };
 
-//     // --- Create dependent data ---
-//     // Keep track of created items to link them
-//     const createdSites = [];
-//     const createdBuildings = [];
-//     const createdApartments = [];
-//     const createdServices = [];
-//     const createdAgreements = [];
-//     const createdOwnershipShares = [];
-//     const createdReserveFunds = [];
-//     const createdMissions = [];
-//     const createdTasks = [];
-//     const createdServiceRequests = [];
-//     const createdDevis = [];
-//     const createdPartiesCommunes = [];
-//     const createdVotes = [];
-//     const createdCotisations = [];
-//     const createdDepenses = [];
-//     // ... and so on
-
-//     // 2. Create Sites (Example: 2 sites for the first user's contract)
-//     console.log("\nCreating Sample Sites...");
-//     const user0Data = getUserData(0);
-//     if (user0Data?.contract) {
-//         for (let j = 0; j < 2; j++) {
-//             try {
-//                 const site = await Sites.create({
-//                     siteName: faker.company.name() + ` Site ${j + 1}`,
-//                     siteDetails: faker.lorem.sentence(),
-//                     siteAddress: faker.location.streetAddress(),
-//                     siteCity: faker.location.city(),
-//                     siteType: faker.helpers.arrayElement(["Simple", "Complex"]),
-//                     siteStatus: "Active",
-//                     sitePrefix: `ST-${j + 1}`,
-//                     siteContract: user0Data.contract._id, // Link to user's contract
-//                 });
-//                 createdSites.push(site);
-//                 console.log(`Created site: ${site.siteName} (Contract: ${user0Data.contract._id})`);
-//             } catch(err) { console.error(`Error creating site ${j+1}: ${err.message}`); }
-//         }
-//     } else { console.warn("Skipping site creation: User 0 data or contract missing."); }
-
-//     // 3. Create Buildings (Example: 3 per site)
-//     console.log("\nCreating Sample Buildings...");
-//     for (const site of createdSites) {
-//         for (let i = 0; i < 3; i++) {
-//              try {
-//                 const building = await Buildings.create({
-//                     buildingName: `Building ${faker.word.noun()} ${i + 1}`,
-//                     buildingAddress: faker.location.secondaryAddress(), // e.g., Apt. 123
-//                     buildingPrefix: `BLD-${site.sitePrefix}-${i + 1}`,
-//                     buildingFloors: faker.number.int({ min: 2, max: 10 }),
-//                     buildingAptPerFloor: faker.number.int({ min: 2, max: 6 }),
-//                     buildingSite: site._id,
-//                     buildingContract: site.siteContract,
-//                     buildingStatus: "Active",
-//                 });
-//                 createdBuildings.push(building);
-//                 console.log(`Created building: ${building.buildingName} (Site: ${site.siteName})`);
-//              } catch(err) { console.error(`Error creating building ${i+1} for site ${site.siteName}: ${err.message}`); }
-//         }
-//     }
-
-//     // 4. Create Apartments (Example: 5 per building, assign owners/users round-robin)
-//     console.log("\nCreating Sample Apartments...");
-//     let userIndex = 0;
-//     for (const building of createdBuildings) {
-//         for (let i = 0; i < 5; i++) {
-//             const ownerData = getUserData(userIndex % createdUsersComposite.length);
-//             const tenantData = getUserData((userIndex + 1) % createdUsersComposite.length); // Example: next user is tenant
-//             if (ownerData?.user && tenantData?.user) {
-//                  try {
-//                     const ownershipPercentage = 100 / 5; // Simple equal distribution for example
-//                     const apartment = await Apartments.create({
-//                         apartmentNumber: `${building.buildingFloors > i ? i + 1 : 1}0${i % 4 + 1}`, // Example numbering
-//                         apartmentEtage: building.buildingFloors > i ? i + 1 : 1,
-//                         apartmentType: faker.helpers.arrayElement(["Rental", "Property"]),
-//                         apartmentStatus: faker.helpers.arrayElement(["Active", "Inactive", "Suspended"]),
-//                         apartmentOwner: ownerData.user._id,
-//                         apartmentUser: tenantData.user._id, // Could be same as owner
-//                         apartmentBuilding: building._id,
-//                         apartmentSite: building.buildingSite,
-//                         apartmentContract: building.buildingContract,
-//                         ownershipPercentage: ownershipPercentage, // Assign calculated percentage
-//                         commonAreasContribution: ownershipPercentage * 10, // Example calculation
-//                     });
-//                     createdApartments.push(apartment);
-//                     console.log(`Created apartment: ${apartment.apartmentNumber} (Building: ${building.buildingName}, Owner: ${ownerData.user.userEmail})`);
-//                     userIndex++;
-//                  } catch(err) { console.error(`Error creating apartment ${i+1} for building ${building.buildingName}: ${err.message}`); }
-//             } else { console.warn(`Skipping apartment creation for building ${building.buildingName}: Missing owner/tenant data.`); }
-//         }
-//     }
-
-//     // 5. Create Services (Example: 2 per user/contractor)
-//     console.log("\nCreating Sample Services...");
-//      for (let i = 0; i < createdUsersComposite.length; i++) {
-//         const userData = getUserData(i);
-//         if (userData?.contractor) {
-//             for (let j = 0; j < 2; j++) {
-//                  try {
-//                     const service = await Services.create({
-//                         servicesProvider: userData.contractor._id,
-//                         servicesName: faker.commerce.productName() + ` Service ${j+1}`,
-//                         servicesType: faker.commerce.department(),
-//                         servicesCost: faker.commerce.price({ min: 50, max: 500 }),
-//                         description: faker.lorem.sentence(),
-//                     });
-//                     createdServices.push(service);
-//                     console.log(`Created service: ${service.servicesName} (Provider: ${userData.contractor.contractorTitle})`);
-//                  } catch(err) { console.error(`Error creating service ${j+1} for contractor ${userData.contractor.contractorTitle}: ${err.message}`); }
-//             }
-//         } else { console.warn(`Skipping service creation for user index ${i}: Missing contractor data.`); }
-//      }
-
-//     // 6. Create Agreements (Example: 1 per site)
-//     console.log("\nCreating Sample Agreements...");
-//     for (const site of createdSites) {
-//         const contractorData = getUserData(createdSites.indexOf(site) % createdUsersComposite.length); // Assign a contractor
-//         const staffData = getUserData((createdSites.indexOf(site) + 1) % createdUsersComposite.length); // Assign staff members
-//         if (contractorData?.contractor && staffData?.staff) {
-//             try {
-//                 const agreement = await Agreements.create({
-//                     agreementContract: site.siteContract,
-//                     agreementSite: site._id,
-//                     agreementContractor: [contractorData.contractor._id],
-//                     agreementTerm: faker.helpers.arrayElement(['half-yearly', 'quarterly', 'annually']),
-//                     agreementStart: faker.date.past({ years: 1 }),
-//                     agreementEnd: faker.date.future({ years: 1 }),
-//                     agreementBoardMembers: {
-//                         syndic: staffData.staff._id, // Assign staff as board members
-//                         adjoint: getUserData((createdSites.indexOf(site) + 2) % createdUsersComposite.length)?.staff?._id,
-//                         tresorier: getUserData((createdSites.indexOf(site) + 3) % createdUsersComposite.length)?.staff?._id,
-//                         members: [getUserData((createdSites.indexOf(site) + 4) % createdUsersComposite.length)?.staff?._id].filter(id => id), // Ensure no nulls
-//                     },
-//                     agreementServicesIncluded: faker.datatype.boolean(),
-//                     agreementServices: faker.helpers.arrayElements(createdServices.map(s => s._id), faker.number.int({ min: 0, max: 3 })), // Link 0-3 random services
-//                     agreementBudget: faker.finance.amount({ min: 5000, max: 50000 }),
-//                     agreementStatus: true, // Active
-//                     reserveFundSettings: { contributionRate: faker.number.int({ min: 1, max: 10 }), minBalance: faker.number.int({ min: 0, max: 1000 }) },
-//                     quorumRules: { ordinary: faker.number.int({ min: 40, max: 60 }), extraordinary: faker.number.int({ min: 65, max: 85 }) },
-//                 });
-//                 createdAgreements.push(agreement);
-//                 console.log(`Created agreement: ${agreement._id} (Site: ${site.siteName})`);
-//             } catch (err) { console.error(`Error creating agreement for site ${site.siteName}: ${err.message}`); }
-//         } else { console.warn(`Skipping agreement creation for site ${site.siteName}: Missing contractor/staff data.`); }
-//     }
-
-//     // 7. Create OwnershipShares (One per apartment, linked to owner)
-//     console.log("\nCreating Sample OwnershipShares...");
-//     for (const apartment of createdApartments) {
-//         if (apartment.apartmentOwner) {
-//             try {
-//                 const share = await OwnershipShares.create({
-//                     apartment: apartment._id,
-//                     owner: apartment.apartmentOwner,
-//                     percentage: apartment.ownershipPercentage, // Use percentage from apartment
-//                     effectiveDate: apartment.createdAt, // Start date from apartment creation
-//                     endDate: null, // Current share
-//                     historicalVersions: [],
-//                 });
-//                 createdOwnershipShares.push(share);
-//                 console.log(`Created ownership share for Apartment ${apartment.apartmentNumber} (Owner: ${apartment.apartmentOwner})`);
-//             } catch (err) { console.error(`Error creating ownership share for apartment ${apartment.apartmentNumber}: ${err.message}`); }
-//         } else { console.warn(`Skipping ownership share creation for apartment ${apartment.apartmentNumber}: Missing owner.`); }
-//     }
-
-//     // 8. Create Cotisations (Example: 1 per ownership share)
-//     console.log("\nCreating Sample Cotisations...");
-//     for (const share of createdOwnershipShares) {
-//         const apartment = createdApartments.find(a => a._id.equals(share.apartment));
-//         if (apartment) {
-//             try {
-//                 const totalAmount = faker.finance.amount({ min: 50, max: 200 });
-//                 const reserveAmount = totalAmount * 0.1; // 10% to reserve
-//                 const ordinaryAmount = totalAmount - reserveAmount;
-//                 const cotisation = await Cotisations.create({
-//                     cotisationType: faker.helpers.arrayElement(['Quarterly Dues', 'Special Assessment']),
-//                     cotisationAppartment: share.apartment,
-//                     cotisationMoyPaiement: faker.helpers.arrayElement(['Bank Transfer', 'Cash', 'Check']),
-//                     cotisationMontant: totalAmount,
-//                     cotisationStuff: adminUserData.id, // Recorded by admin
-//                     cotisationMotif: faker.lorem.sentence(),
-//                     paymentStatus: faker.helpers.arrayElement(['Pending', 'Paid', 'Overdue']),
-//                     dueDate: faker.date.future(),
-//                     breakdown: {
-//                         ordinary: ordinaryAmount,
-//                         extraordinary: 0,
-//                         reserve: reserveAmount,
-//                     },
-//                     ownershipShare: share._id,
-//                 });
-//                 createdCotisations.push(cotisation);
-//                 console.log(`Created cotisation for Apartment ${apartment.apartmentNumber} (Share: ${share._id})`);
-//             } catch (err) { console.error(`Error creating cotisation for share ${share._id}: ${err.message}`); }
-//         } else { console.warn(`Skipping cotisation creation for share ${share._id}: Corresponding apartment not found.`); }
-//     }
-
-//     // 9. Create ReserveFunds (One per agreement)
-//     console.log("\nCreating Sample ReserveFunds...");
-//     for (const agreement of createdAgreements) {
-//         try {
-//             // Add some initial contribution transactions based on created cotisations
-//             const relatedCotisations = createdCotisations.filter(c => {
-//                 const share = createdOwnershipShares.find(s => s._id.equals(c.ownershipShare));
-//                 const apartment = share ? createdApartments.find(a => a._id.equals(share.apartment)) : null;
-//                 return apartment && apartment.apartmentSite.equals(agreement.agreementSite);
-//             });
-
-//             const transactions = relatedCotisations.map(cot => ({
-//                 type: 'Contribution',
-//                 amount: cot.breakdown.reserve,
-//                 reference: cot._id,
-//                 refModel: 'Cotisations',
-//                 date: cot.createdAt,
-//                 description: `Initial contribution from Cotisation ${cot._id}`
-//             }));
-
-//             const reserveFund = await ReserveFunds.create({
-//                 agreement: agreement._id,
-//                 currentBalance: 0, // Balance will be calculated by pre-save hook
-//                 transactions: transactions,
-//             });
-//             createdReserveFunds.push(reserveFund);
-//             console.log(`Created reserve fund for Agreement ${agreement._id} with ${transactions.length} initial transactions.`);
-//         } catch (err) { console.error(`Error creating reserve fund for agreement ${agreement._id}: ${err.message}`); }
-//     }
-
-//     // 10. Create Missions (Example: 1 per site)
-//     console.log("\nCreating Sample Missions...");
-//     for (const site of createdSites) {
-//         const contractorData = getUserData(createdSites.indexOf(site) % createdUsersComposite.length);
-//         if (contractorData?.contractor) {
-//             try {
-//                 const mission = await Missions.create({
-//                     missionName: `Maintenance Mission ${site.siteName}`,
-//                     missionDetails: faker.lorem.paragraph(),
-//                     missionType: 'Routine Check',
-//                     missionPrice: faker.finance.amount({ min: 100, max: 1000 }),
-//                     missionContractor: contractorData.contractor._id,
-//                     missionSite: site._id,
-//                     missionState: faker.helpers.arrayElement(['Planned', 'InProgress', 'Completed']),
-//                 });
-//                 createdMissions.push(mission);
-//                 console.log(`Created mission: ${mission.missionName} (Site: ${site.siteName})`);
-//             } catch (err) { console.error(`Error creating mission for site ${site.siteName}: ${err.message}`); }
-//         } else { console.warn(`Skipping mission creation for site ${site.siteName}: Missing contractor data.`); }
-//     }
-
-//     // 11. Create Tasks (Example: 2 per mission)
-//     console.log("\nCreating Sample Tasks...");
-//     for (const mission of createdMissions) {
-//         const staffData = getUserData(createdMissions.indexOf(mission) % createdUsersComposite.length);
-//         if (staffData?.staff) {
-//             for (let i = 0; i < 2; i++) {
-//                 try {
-//                     const task = await Tasks.create({
-//                         taskName: `Task ${i + 1} for ${mission.missionName}`,
-//                         taskDetail: faker.lorem.sentence(),
-//                         taskType: 'Inspection',
-//                         taskStart: faker.date.soon(),
-//                         taskEnd: faker.date.soon({ days: 5 }),
-//                         taskSeverity: faker.helpers.arrayElement(['Low', 'Medium', 'High']),
-//                         taskNotes: [{ note: faker.lorem.sentence(), author: adminUserData.id }],
-//                         taskPrice: faker.finance.amount({ min: 20, max: 200 }),
-//                         taskStuff: [staffData.staff._id], // Assign staff
-//                         taskMission: mission._id,
-//                         taskSite: mission.missionSite,
-//                         taskState: faker.helpers.arrayElement(['Todo', 'InProgress', 'Done']),
-//                         relatedApartment: faker.helpers.arrayElement(createdApartments.filter(a => a.apartmentSite.equals(mission.missionSite)).map(a => a._id)), // Optional link to apartment on same site
-//                     });
-//                     createdTasks.push(task);
-//                     console.log(`Created task: ${task.taskName} (Mission: ${mission.missionName})`);
-//                 } catch (err) { console.error(`Error creating task for mission ${mission.missionName}: ${err.message}`); }
-//             }
-//         } else { console.warn(`Skipping task creation for mission ${mission.missionName}: Missing staff data.`); }
-//     }
-
-//     // 12. Create Depenses (Example: 1 per completed task, some from reserve)
-//     console.log("\nCreating Sample Depenses...");
-//     for (const task of createdTasks.filter(t => t.taskState === 'Done')) {
-//         const agreement = createdAgreements.find(a => a.agreementSite.equals(task.taskSite));
-//         const contractorData = getUserData(createdTasks.indexOf(task) % createdUsersComposite.length);
-//         const reserveFund = agreement ? createdReserveFunds.find(rf => rf.agreement.equals(agreement._id)) : null;
-//         const useReserve = faker.datatype.boolean(0.3) && reserveFund; // 30% chance to use reserve if available
-
-//         if (agreement && contractorData?.contractor) {
-//             try {
-//                 const depense = await Depenses.create({
-//                     depenseName: `Expense for ${task.taskName}`,
-//                     depenseType: useReserve ? 'Reserve' : faker.helpers.arrayElement(['Ordinary', 'Extraordinary']),
-//                     depenseMontant: task.taskPrice || faker.finance.amount({ min: 50, max: 300 }),
-//                     depenseDate: task.taskEnd || new Date(),
-//                     depenseStuff: adminUserData.id, // Recorded by admin
-//                     depenseDocuments: [{ name: 'invoice.pdf', url: faker.internet.url(), type: 'Invoice' }],
-//                     depenseBenificiaire: contractorData.contractor._id,
-//                     depenseMission: task.taskMission,
-//                     depenseTask: task._id,
-//                     reserveFundSource: useReserve ? reserveFund._id : null,
-//                     agreement: agreement._id,
-//                 });
-//                 createdDepenses.push(depense);
-//                 console.log(`Created depense: ${depense.depenseName} (Task: ${task.taskName})`);
-
-//                 // If it was a reserve withdrawal, add transaction to ReserveFund
-//                 if (useReserve) {
-//                     reserveFund.transactions.push({
-//                         type: 'Withdrawal',
-//                         amount: -depense.depenseMontant, // Negative amount for withdrawal
-//                         reference: depense._id,
-//                         refModel: 'Depenses',
-//                         description: `Withdrawal for Depense ${depense._id}`
-//                     });
-//                     await reserveFund.save(); // Trigger pre-save hook to update balance
-//                     console.log(`Added withdrawal transaction to ReserveFund ${reserveFund._id} for Depense ${depense._id}`);
-//                 }
-
-//             } catch (err) { console.error(`Error creating depense for task ${task.taskName}: ${err.message}`); }
-//         } else { console.warn(`Skipping depense creation for task ${task.taskName}: Missing agreement or contractor data.`); }
-//     }
-
-//     // 13. Create ServiceRequests (Example: 1 per site)
-//     console.log("\nCreating Sample ServiceRequests...");
-//     for (const site of createdSites) {
-//         const userData = getUserData(createdSites.indexOf(site) % createdUsersComposite.length);
-//         const mission = createdMissions.find(m => m.missionSite.equals(site._id)); // Find a mission on the same site
-//         if (userData?.user) {
-//             try {
-//                 const serviceRequest = await ServiceRequests.create({
-//                     serviceRequestUser: userData.user._id,
-//                     serviceRequestMission: mission?._id, // Optional link
-//                     serviceRequestSite: site._id,
-//                     serviceRequestState: faker.helpers.arrayElement(['New', 'Assigned', 'InProgress', 'Completed']),
-//                     requestTitle: `Request for ${faker.hacker.verb()} on ${site.siteName}`,
-//                     requestDetails: faker.lorem.paragraph(),
-//                     assignedContractor: mission?.missionContractor, // Assign contractor from mission if exists
-//                 });
-//                 createdServiceRequests.push(serviceRequest);
-//                 console.log(`Created service request: ${serviceRequest.requestTitle} (Site: ${site.siteName})`);
-//             } catch (err) { console.error(`Error creating service request for site ${site.siteName}: ${err.message}`); }
-//         } else { console.warn(`Skipping service request creation for site ${site.siteName}: Missing user data.`); }
-//     }
-
-//     // 14. Create Devis (Example: 1 per service request)
-//     console.log("\nCreating Sample Devis...");
-//     for (const request of createdServiceRequests) {
-//         try {
-//             const devis = await Devis.create({
-//                 devisServiceRequest: request._id,
-//                 devisPrice: faker.finance.amount({ min: 100, max: 2000 }),
-//                 devisState: faker.helpers.arrayElement(['Draft', 'Sent', 'Approved', 'Rejected']),
-//                 devisDetails: faker.lorem.sentence(),
-//                 validUntil: faker.date.future(),
-//             });
-//             createdDevis.push(devis);
-//             // Link back to service request
-//             request.relatedDevis = devis._id;
-//             await request.save();
-//             console.log(`Created devis ${devis._id} for ServiceRequest ${request._id}`);
-//         } catch (err) { console.error(`Error creating devis for service request ${request._id}: ${err.message}`); }
-//     }
-
-//     // 15. Create PartiesCommunes (Example: 2 per building)
-//     console.log("\nCreating Sample PartiesCommunes...");
-//     for (const building of createdBuildings) {
-//         const contractorData = getUserData(createdBuildings.indexOf(building) % createdUsersComposite.length);
-//         for (let i = 0; i < 2; i++) {
-//             try {
-//                 const partie = await PartiesCommunes.create({
-//                     partiesCommuneName: `${faker.word.adjective()} ${faker.word.noun()} Area ${i + 1}`,
-//                     partiesCommuneEtage: faker.number.int({ min: 0, max: building.buildingFloors }),
-//                     partiesCommuneType: faker.helpers.arrayElement(['Hallway', 'Staircase', 'Roof', 'Garden', 'Elevator']),
-//                     partiesCommuneState: faker.helpers.arrayElement(['Good', 'Fair', 'Poor', 'NeedsRepair']),
-//                     partiesCommuneImmeuble: building._id,
-//                     partiesCommunePrestataire: contractorData?.contractor?._id, // Optional link to contractor
-//                 });
-//                 createdPartiesCommunes.push(partie);
-//                 console.log(`Created partie commune: ${partie.partiesCommuneName} (Building: ${building.buildingName})`);
-//             } catch (err) { console.error(`Error creating partie commune for building ${building.buildingName}: ${err.message}`); }
-//         }
-//     }
-
-//     // 16. Create Votes (Example: 1 per agreement)
-//     console.log("\nCreating Sample Votes...");
-//     for (const agreement of createdAgreements) {
-//         // Find shares related to this agreement's site
-//         const relatedShares = createdOwnershipShares.filter(share => {
-//             const apt = createdApartments.find(a => a._id.equals(share.apartment));
-//             return apt && apt.apartmentSite.equals(agreement.agreementSite);
-//         });
-
-//         if (relatedShares.length > 0) {
-//             try {
-//                 const vote = await Votes.create({
-//                     agreement: agreement._id,
-//                     title: `Vote for ${faker.company.catchPhrase()}`,
-//                     description: faker.lorem.paragraph(),
-//                     type: faker.helpers.arrayElement(['Ordinary', 'Extraordinary']),
-//                     decisions: [{ // Example decision
-//                         description: `Approve ${faker.commerce.productName()} purchase`,
-//                         // Simulate some votes
-//                         votesFor: faker.helpers.arrayElements(relatedShares.map(s => ({ share: s._id })), faker.number.int({ min: 0, max: relatedShares.length / 2 })),
-//                         votesAgainst: faker.helpers.arrayElements(relatedShares.map(s => ({ share: s._id })), faker.number.int({ min: 0, max: relatedShares.length / 3 })),
-//                         abstentions: faker.helpers.arrayElements(relatedShares.map(s => ({ share: s._id })), faker.number.int({ min: 0, max: relatedShares.length / 4 })),
-//                     }],
-//                     quorumRequired: agreement.quorumRules.ordinary, // Use agreement rules
-//                     majorityRequired: 50.1, // Example majority
-//                     meetingDate: faker.date.past(),
-//                     status: 'Closed',
-//                 });
-//                 createdVotes.push(vote);
-//                 console.log(`Created vote: ${vote.title} (Agreement: ${agreement._id})`);
-//             } catch (err) { console.error(`Error creating vote for agreement ${agreement._id}: ${err.message}`); }
-//         } else { console.warn(`Skipping vote creation for agreement ${agreement._id}: No related ownership shares found.`); }
-//     }
-
-//     // 17. Create Emails (Example: 5 system emails)
-//     console.log("\nCreating Sample Emails...");
-//     for (let i = 0; i < 5; i++) {
-//         const recipientUser = getUserData(i)?.user;
-//         if (recipientUser) {
-//             try {
-//                 await Emails.create({
-//                     emailSubject: faker.lorem.sentence(),
-//                     emailBody: `<p>${faker.lorem.paragraphs()}</p>`,
-//                     emailRecipient: [recipientUser.userEmail],
-//                     emailSender: 'system@syndikit.local',
-//                     emailStatus: faker.helpers.arrayElement(['sent', 'pending', 'failed']),
-//                     emailSentAt: faker.helpers.maybe(() => faker.date.past(), { probability: 0.8 }), // 80% chance it was sent
-//                 });
-//                 console.log(`Created sample email to ${recipientUser.userEmail}`);
-//             } catch (err) { console.error(`Error creating email for user ${recipientUser.userEmail}: ${err.message}`); }
-//         }
-//     }
-
-//     // 18. Create Notifications (Example: 3 per user)
-//     console.log("\nCreating Sample Notifications...");
-//     for (let i = 0; i < createdUsersComposite.length; i++) {
-//         const userData = getUserData(i);
-//         if (userData?.user) {
-//             for (let j = 0; j < 3; j++) {
-//                 try {
-//                     await Notifications.create({
-//                         notificationCreator: adminUserData.id, // Admin created notification
-//                         notificationTitle: faker.lorem.words(5),
-//                         notificationType: faker.helpers.arrayElement(["success", "info", "warning", "error"]),
-//                         notificationText: faker.lorem.sentence(),
-//                         notificationTarget: [{ targetUser: userData.user._id, targetRead: faker.datatype.boolean(0.5) }], // 50% read
-//                         notificationLink: faker.helpers.maybe(() => `/some/link/${faker.string.uuid()}`, { probability: 0.7 }),
-//                     });
-//                     console.log(`Created notification for user ${userData.user.userEmail}`);
-//                 } catch (err) { console.error(`Error creating notification for user ${userData.user.userEmail}: ${err.message}`); }
-//             }
-//         }
-//     }
-
-//     // 19. Create Sessions (Example: 1 active per user)
-//     console.log("\nCreating Sample Sessions...");
-//     for (let i = 0; i < createdUsersComposite.length; i++) {
-//         const userData = getUserData(i);
-//         if (userData?.user) {
-//             try {
-//                 await Sessions.create({
-//                     userId: userData.user._id,
-//                     ipAddress: faker.internet.ipv4(),
-//                     deviceInfo: faker.internet.userAgent(),
-//                     status: 'Active',
-//                 });
-//                 console.log(`Created active session for user ${userData.user.userEmail}`);
-//             } catch (err) { console.error(`Error creating session for user ${userData.user.userEmail}: ${err.message}`); }
-//         }
-//     }
-
-//     // 20. Create TwoFA Records (Example: 1 per user, pending)
-//     console.log("\nCreating Sample TwoFA Records...");
-//     for (let i = 0; i < createdUsersComposite.length; i++) {
-//         const userData = getUserData(i);
-//         if (userData?.user) {
-//             try {
-//                 await TwoFA.create({
-//                     twoFAUser: userData.user._id,
-//                     twoFAStatus: 'Pending', // Start as pending
-//                     twoFAMethod: 'Email',
-//                     twoFAPassCode: [], // No codes generated initially
-//                 });
-//                 console.log(`Created TwoFA record for user ${userData.user.userEmail}`);
-//             } catch (err) {
-//                 // Handle potential duplicate key error if record already exists
-//                 if (err.code !== 11000) {
-//                     console.error(`Error creating TwoFA record for user ${userData.user.userEmail}: ${err.message}`);
-//                 } else {
-//                     console.warn(`TwoFA record already exists for user ${userData.user.userEmail}. Skipping.`);
-//                 }
-//             }
-//         }
-//     }
+    // --- Create dependent data ---
+    // Keep track of created items to link them
+    const createdAgreements = [];
+    const createdTasks = []; 
+    // ... and so on  
 
 
-//     console.log("\n--- Database Population with Sample Data Completed ---");
-//   } catch (error) {
-//     console.error("Error populating database with sample data:", error.message);
-//     console.error(error.stack);
-//     // Decide if this error should halt the entire application start (throw error)
-//     // or just log a warning (don't throw)
-//     // throw error; // Optional: re-throw if sample data population failure is critical
-//   }
-// };
+    console.log("\n--- Database Population with Sample Data Completed ---");
+  } catch (error) {
+    console.error("Error populating database with sample data:", error.message);
+    console.error(error.stack);
+    // Decide if this error should halt the entire application start (throw error)
+    // or just log a warning (don't throw)
+    // throw error; // Optional: re-throw if sample data population failure is critical
+  }
+};
 
 
 // --- Initialization Logic ---

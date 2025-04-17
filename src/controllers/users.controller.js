@@ -196,36 +196,15 @@ exports.check     = async function (req, res) {
     return res.status(400).json({ error: true, message: 'Field required', data: req.body });
   }else{
 
-    /* const userResult = await UserHelpers.findById(req.decoded.id);
-
-    if (userResult.error){
-      return res.status(userResult.code).json({ error: true, message: userResult.payload, data: { userPack: "userLoginError" } });
-
-    }
-    else if (!userResult.payload) {
-      return res.status(userResult.code).json({ error: true, message: "userEmailUnfound", data: { userEmail: "userEmailUnfound" } });
-
-    } */
-
     const checkResult = await UserHelpers.check({
       headers: req.headers,
       decoded: {
         id: req.decoded.user.id,
         token: req.headers["x-access-token"],
         ... req.decoded,
-        // contractor: req.decoded.contractor,
-        // staff: req.decoded.staff,
-        // user: req.decoded.user,
-
-        // id: req.decoded.user.id,
-        // pack: {
-        //   id: req.decoded.user.userPack.id,
-        //   packName: req.decoded.user.userPack.packName,
-        //   packOptions: req.decoded.user.userPack.packOptions
-        // }
       },
       pathname: req.headers["origin-referrer"]
-    }, res)
+    }, "MANAGER") // TODO: check this later
 
 
 
@@ -317,92 +296,6 @@ exports.login = async function (req, res) {
       });
   }
 };
-
-
-/* exports.login = async function (req, res) {
-  // Handles empty request body (Field required)
-  if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-    return res.status(400).json({
-      error: true,
-      message: 'Field required',
-      data: req.body
-    });
-  } else {
-    const formData = req.body?.formData?.users;
-    // Form validation
-    const { errors, isValid, code } = validateLoginInput(formData);
-
-    // Validation failed (Bad request)
-    if (!isValid) {
-      return res.status(code).json({
-        error: true,
-        message: "ValidationFailed",
-        data: errors
-      });
-    }
-
-    // Attempt to log in the user
-    const userResult = await UserHelpers.login(formData, res);
-
-    // User not found (Server error: Potential database or internal issue)
-    if (userResult.error) {
-      return res.status(userResult.code).json({
-        error: true,
-        message: req?.body?.formData?.userEmail,
-        data: userResult.payload
-      }); // TODO: fix the syntax of the error {users: [{ errors ... }]}
-
-    } else if (!userResult.payload) {
-      
-      return res.status(userResult.code).json({
-        error: true,
-        message: req?.body?.formData?.userEmail,
-        data: { userEmail: "userEmailUnfound" }
-      });
-    }
-
-    // Generate a new Token
-    const tokenizeResult = await UserHelpers.tokenize(userResult.payload, false)
-    
-    // Handle Token creation errors
-    if (tokenizeResult.error) {
-      return res.status(500).json({ error: true, message: tokenizeResult.error, data: tokenizeResult.payload });
-    }
-
-    // delete tokenizeResult.payload.id
-
-
-    const checkResult = await UserHelpers.check({
-      headers: req.headers,
-      decoded: tokenizeResult.payload,
-      pathname: req.headers["origin-referrer"]
-    }, res)
-
-
-
-    return res.status(checkResult.code).json({
-      error: checkResult.error,
-      message : true,
-      data: checkResult.payload
-    });
-
-
-    // // User found (Success)
-    // return res.status(200).json({
-    //   error: false,
-    //   message: 'Login successful',
-    //   data: {
-    //     ...tokenizeResult.payload,
-    //     redirect: {
-    //       replace: true, 
-    //       redirect: true, 
-    //       to: `/${tokenizeResult.payload?.pack?.packName?.toLowerCase()}/dashboard`
-    //     }
-    //   }
-    //   //userResult.payload // returning the user details or token
-    // });
-  }
-}; */
 
 exports.activate     = async function (req, res) {
   // Handles null error

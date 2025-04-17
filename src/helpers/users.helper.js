@@ -2076,7 +2076,7 @@ exports.check = async function (req, whoIsDemanding = 'USER') {
       switch (user.userStatus) {
 
         case "Pending":
-          if (user.userPack.packName === "Administrator") {
+          // if (user.userPack.packName === "Administrator") {
 
             resData.menu    = []
             resData.context = syndicateContext.Pending
@@ -2087,14 +2087,24 @@ exports.check = async function (req, whoIsDemanding = 'USER') {
               to: `/registering`,
               data: [],
             }
-          }
+          // }
           break
 
         case "OnHold":
-          // [ Contractor ] Basic User must fulfill the requirements (Create Site & Buildings + Sets his Aprt ) : redirect to `/welcome`,
           if (user.userPack.packName === "Administrator") {
 
-            // const shareUrl = `${req.headers.origin}/register?packName=Syndicate&contractId=${existContracts[0].id}&referrer=${user.id}`
+            resData.context = syndicateContext.onHold
+
+            resData.redirect = {
+              replace: true,
+              redirect: true,
+              to: `/${user.userPack.packName}/dashboard`.toLowerCase(),
+              data: [],
+            }
+
+            resData.menu = []
+          } 
+          else if (user.userPack.packName === "Contractor") {
 
             resData.context = syndicateContext.onHold
 
@@ -2107,6 +2117,20 @@ exports.check = async function (req, whoIsDemanding = 'USER') {
 
             resData.menu = []
           }
+          else if (user.userPack.packName === "Customer") {
+
+            resData.context = syndicateContext.onHold
+
+            resData.redirect = {
+              replace: true,
+              redirect: true,
+              to: `/${user.userPack.packName}/dashboard`.toLowerCase(),
+              data: [],
+            }
+
+            resData.menu = []
+          }
+
           break
 
         case "Active":
@@ -2123,7 +2147,31 @@ exports.check = async function (req, whoIsDemanding = 'USER') {
             }
 
           }
-        
+          else if (user.userPack.packName === "Contractor") {
+
+            resData.context = syndicateContext.Active
+            resData.menu = syndicateMenu.active;
+            resData.redirect = {
+              replace: true,
+              redirect: true,
+              to: `/${user.userPack.packName}/dashboard`.toLowerCase(),
+              data: [],
+            }
+
+          }
+          else if (user.userPack.packName === "Customer") {
+
+            resData.context = syndicateContext.Active
+            resData.menu = syndicateMenu.active;
+            resData.redirect = {
+              replace: true,
+              redirect: true,
+              to: `/${user.userPack.packName}/dashboard`.toLowerCase(),
+              data: [],
+            }
+
+          }
+          
           break
 
         case "Inactive":
