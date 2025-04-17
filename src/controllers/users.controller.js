@@ -22,9 +22,9 @@ const Role        = require('../models/roles.model');
 const Pack        = require('../models/packs.model');
 const Contractor  = require('../models/contractors.model');
 const Contract    = require('../models/contracts.model');
-const Site        = require('../models/sites.model');
-const Building    = require('../models/buildings.model');
-const Apartment   = require('../models/apartments.model');
+const Site        = {} //require('../models/sites.model');
+const Building    = {} //require('../models/buildings.model');
+const Apartment   = {} //require('../models/apartments.model');
 
 const UserHelpers       = require('../helpers/users.helper');
 const ContractorHelpers = require('../helpers/contractors.helper');
@@ -278,7 +278,7 @@ exports.login = async function (req, res) {
     const userDocument = loginResult.payload;
 
     // Step 3: Generate token and prepare payload
-    const tokenizeResult = await UserHelpers.tokenize(userDocument); // Pass the user document
+    const tokenizeResult = await UserHelpers.tokenize(userDocument, "MANAGER"); // Pass the user document
 
     // Handle token generation errors
     if (tokenizeResult.error || !tokenizeResult.payload) {
@@ -297,7 +297,7 @@ exports.login = async function (req, res) {
         decoded: tokenizeResult.payload, // Pass the entire payload from tokenize
         pathname: req.headers["origin-referrer"] // Or determine pathname as needed
     };
-    const checkResult = await UserHelpers.check(checkRequestData, res); // Pass constructed data and res
+    const checkResult = await UserHelpers.check(checkRequestData, "MANAGER"); // Pass constructed data and res
 
     // Step 5: Send the final response from the check result
     // The checkResult payload should contain everything needed (token, user, menu, redirect, etc.)

@@ -413,7 +413,7 @@ exports.update = async function (id, updateData, login) {
 }; */
 
 // generate Token // TODO: remove senseitive data from output
-exports.tokenize = async function (user, login) {
+exports.tokenize = async function (user, whoIsDemanding = 'USER') {
   let returnUser = {
     error: false,
     payload: null,
@@ -447,7 +447,7 @@ exports.tokenize = async function (user, login) {
     }
 
     // Find Contractor by user id
-    const contractor = await ContractorHelpers.findOne({ contractorUser: user.id });
+    const contractor = await ContractorHelpers.findOne({ contractorUser: user.id }, whoIsDemanding);
 
     if (contractor.error) {
       tokenize.contractor = {};
@@ -456,7 +456,7 @@ exports.tokenize = async function (user, login) {
     }
 
     // Find Staff by user id and contractor id
-    const staff = await StaffHelpers.findOne({ staffUser: user.id, staffContractor: contractor.payload.id })
+    const staff = await StaffHelpers.findOne({ staffUser: user.id, staffContractor: contractor.payload.id }, whoIsDemanding)
 
     if (staff.error) {
       tokenize.staff = {}
@@ -577,7 +577,7 @@ exports.login = async function (formData, res) {
     }
 
     // Find contractor by user ID
-    const contractorResult = await ContractorHelpers.findOne({ contractorUser: userResult.id });
+    const contractorResult = await ContractorHelpers.findOne({ contractorUser: userResult.id }, 'MANAGER');
     if (!passwordIsValid) {
       returnUser.error = true;
       returnUser.payload = { userEmail: "SUWW-Contractor" };
@@ -586,7 +586,7 @@ exports.login = async function (formData, res) {
     }
 
 
-    returnUser.payload = await userResult.populateAndTransform(contractorResult.id); /* contractor ID to compare with roleContractor */
+    returnUser.payload = await userResult.populateAndTransform('MANAGER'); /* contractor ID to compare with roleContractor */
 
     // Return success payload
     return returnUser;
@@ -2112,7 +2112,7 @@ exports.check = async function (req, res) {
       switch (user.userStatus) {
 
         case "Pending":
-          if (user.userPack.packName === "Syndicate") {
+          if (user.userPack.packName === "Administrator") {
 
             resData.menu    = []
             resData.context = syndicateContext.Pending
@@ -2128,7 +2128,7 @@ exports.check = async function (req, res) {
 
         case "OnHold":
           // [ Contractor ] Basic User must fulfill the requirements (Create Site & Buildings + Sets his Aprt ) : redirect to `/welcome`,
-          if (user.userPack.packName === "Syndicate") {
+          if (user.userPack.packName === "Administrator") {
 
             // const shareUrl = `${req.headers.origin}/register?packName=Syndicate&contractId=${existContracts[0].id}&referrer=${user.id}`
 
@@ -2137,7 +2137,7 @@ exports.check = async function (req, res) {
             resData.redirect = {
               replace: true,
               redirect: true,
-              to: `/${packName}/welcome`.toLowerCase(),
+              to: `/welcome`.toLowerCase(),
               data: [],
             }
 
@@ -2147,14 +2147,14 @@ exports.check = async function (req, res) {
 
         case "Active":
           
-          if (user.userPack.packName === "Syndicate") {
+          if (user.userPack.packName === "Administrator") {
 
             resData.context = syndicateContext.Active
             resData.menu = syndicateMenu.active;
             resData.redirect = {
               replace: true,
               redirect: true,
-              to: `/${packName}/${"dashboard"}`.toLowerCase(),
+              to: `/${"dashboard"}`.toLowerCase(),
               data: [],
             }
 
@@ -2491,6 +2491,8 @@ exports.checkStatus = async function (_user, contractor, staff) {
       break;
 
       default:
+        defaultUserStatus = user.userStatus;
+        defaultUserStatusPayload = contractPayload
       break;
     }
   }

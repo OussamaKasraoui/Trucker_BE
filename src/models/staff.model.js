@@ -18,13 +18,13 @@ const staffSchema = new Schema({
 // --- Instance Methods ---
 
 // Custom toJSON method to modify the response structure
-staffSchema.method("toJSON", function () {
+staffSchema.method("toJSON", function (whoIsDemanding = "USER") {
   const object = this.toObject();
-  return formatStaff(object);
+  return formatStaff(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method for custom populated structure
-staffSchema.method("populateAndTransform", async function () {
+staffSchema.method("populateAndTransform", async function (whoIsDemanding = "USER") {
   // Populate related fields
   const populatePaths = [
       populationSettingsUsers('staffUser', 'USER'), // Populate staffUser with specific fields
@@ -46,7 +46,7 @@ staffSchema.method("populateAndTransform", async function () {
     await this.populate(populatePaths[2]).execPopulate();
   }
 
-  return this.toJSON(); // Return the transformed document
+  return this.toJSON(whoIsDemanding); // Return the transformed document
 });
 
 // --- Static Methods ---

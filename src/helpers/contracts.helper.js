@@ -2,11 +2,11 @@
 const { Count, Notify } = require('./../middelware/helper')
 
 const TwoFAs    = require('../models/twoFA.model');
-const Contract            = require('./../models/contracts.model');
-const Agreement = require('../models/agreements.model');
-const Site      = require('../models/sites.model');
-const Building  = require('../models/buildings.model');
-const Apartment = require('../models/apartments.model');
+const Contract  = require('./../models/contracts.model');
+const Agreement = {}; // require('../models/agreements.model');
+const Site      = {}; // require('../models/sites.model');
+const Building  = {}; // require('../models/buildings.model');
+const Apartment = {}; // require('../models/apartments.model');
 
 
 exports.create = async function (contracts) {
@@ -253,25 +253,79 @@ exports.checkStatus = async function (Contract, user, contractor, staff) {
     // grab: "Pending Status Requirments" : [TwoFAs]
     const existTwoFAs =     await Count(TwoFAs,     { "twoFAUser":         user.id },     user.userPack.packOptions.agreements || 0)
             
-    // grab: "OnHold Status Requirments" : [Sites, Buildings, Apartments]
-    const existSites =      await Count(Site,       { "siteContract":      contract.id }, user.userPack.packOptions.agreements || 0)
-    const existBuildings =  await Count(Building,   { "buildingContract":  contract.id }, user.userPack.packOptions.agreements || 0)
-    const existApartments = await Count(Apartment,  { "apartmentContract": contract.id }, user.userPack.packOptions.agreements || 0)
+    // // grab: "OnHold Status Requirments" : [Sites, Buildings, Apartments]
+    // const existSites =      await Count(Site,       { "siteContract":      contract.id }, user.userPack.packOptions.agreements || 0)
+    // const existBuildings =  await Count(Building,   { "buildingContract":  contract.id }, user.userPack.packOptions.agreements || 0)
+    // const existApartments = await Count(Apartment,  { "apartmentContract": contract.id }, user.userPack.packOptions.agreements || 0)
 
-    // grab: "Active Status Requirments" : [Agreements]
-    const existAgreements = await Count(Agreement, { "agreementContract":  contract.id }, user.userPack.packOptions.agreements || 0)
+    // // grab: "Active Status Requirments" : [Agreements]
+    // const existAgreements = await Count(Agreement, { "agreementContract":  contract.id }, user.userPack.packOptions.agreements || 0)
 
 
     switch (user.userPack.packName) {
-        case 'Syndicate':
+        case 'Administrator':
+            
+        // at this point Contract status should be "Active"
+        if( Boolean(
+                existTwoFAs.length === 1 && 
+                existTwoFAs[0].twoFAStatus === "Verified" 
+        )){
+            defaultContractStatus = "Active"
+        }
+
+        // // at this point Contract status should be "OnHold"
+        // else if( Boolean( 
+        //         existTwoFAs.length === 1 && 
+        //         existTwoFAs[0].twoFAStatus === "Verified" 
+        // )){
+        //     defaultContractStatus = "OnHold"
+        // }
+        
+        // at this point Contract status should be "Pending"
+        else if( Boolean( 
+            existTwoFAs.length === 1 && 
+            existTwoFAs[0].twoFAStatus === "Pending" 
+        )){
+            defaultContractStatus = "Pending"
+        }
+
+        else {
+            defaultContractStatus = "Suspended"
+        }
+
+        
+
+        if( defaultContractStatus !== contract.contractStatus &&
+            !['Inactive', 'Completed', 'Stopped'].includes(contract.contractStatus)
+        ){
+            const contractUpdated = await ContractHelpers.update(user.id, { contractStatus: defaultContractStatus }, false);
+
+            if (contractUpdated.error || !contractUpdated.payload) {
+                
+                defaultContractStatus = "Suspended"
+                contract = {}
+
+            } else {
+                contract = await contractUpdated.payload.toJSON();
+                console.log('contractUpdated:', contractUpdated)
+            }
+
+        } else {
+            defaultContractStatus = contract.contractStatus
+        }
+
+        break;
+
+        case 'Customer':
             
             // at this point Contract status should be "Active"
             if( Boolean(
                     existTwoFAs.length === 1 && 
                     existTwoFAs[0].twoFAStatus === "Verified"  && 
-                    existSites.length && 
-                    existBuildings.length && 
-                    existApartments.length
+                    false
+                    // existSites.length && 
+                    // existBuildings.length && 
+                    // existApartments.length
             )){
                 defaultContractStatus = "Active"
             }
@@ -321,16 +375,59 @@ exports.checkStatus = async function (Contract, user, contractor, staff) {
 
             
         case 'Contractor':
-
-            // at this point Contract status should be "OnHold"
-            if( Boolean(existSites.length && existBuildings.length && existApartments.length )){
-                defaultContractStatus = "OnHold"
-            }
             
-            // at this point Contract status should be "Active"
-            if( Boolean(existAgreements.length )){
-                defaultContractStatus = "Active"
+        // at this point Contract status should be "Active"
+        if( Boolean(
+                existTwoFAs.length === 1 && 
+                existTwoFAs[0].twoFAStatus === "Verified"  && 
+                false
+                // existSites.length && 
+                // existBuildings.length && 
+                // existApartments.length
+        )){
+            defaultContractStatus = "Active"
+        }
+
+        // at this point Contract status should be "OnHold"
+        else if( Boolean( 
+                existTwoFAs.length === 1 && 
+                existTwoFAs[0].twoFAStatus === "Verified" 
+        )){
+            defaultContractStatus = "OnHold"
+        }
+        
+        // at this point Contract status should be "Pending"
+        else if( Boolean( 
+            existTwoFAs.length === 1 && 
+            existTwoFAs[0].twoFAStatus === "Pending" 
+        )){
+            defaultContractStatus = "Pending"
+        }
+
+        else {
+            defaultContractStatus = "Suspended"
+        }
+
+        
+
+        if( defaultContractStatus !== contract.contractStatus &&
+            !['Inactive', 'Completed', 'Stopped'].includes(contract.contractStatus)
+        ){
+            const contractUpdated = await ContractHelpers.update(user.id, { contractStatus: defaultContractStatus }, false);
+
+            if (contractUpdated.error || !contractUpdated.payload) {
+                
+                defaultContractStatus = "Suspended"
+                contract = {}
+
+            } else {
+                contract = await contractUpdated.payload.toJSON();
+                console.log('contractUpdated:', contractUpdated)
             }
+
+        } else {
+            defaultContractStatus = contract.contractStatus
+        }
 
         break;
 

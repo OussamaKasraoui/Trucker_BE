@@ -33,15 +33,15 @@ const PackSchema = Schema({ // Use Schema constructor
 
 // --- Instance Methods ---
 
-PackSchema.method("toJSON", function () {
+PackSchema.method("toJSON", function (whoIsDemanding="USER") {
   const object = this.toObject();
-  return formatPack(object);
+  return formatPack(object, whoIsDemanding);
 });
 
 // Added populateAndTransform (currently no refs to populate)
-PackSchema.method("populateAndTransform", async function () {
+PackSchema.method("populateAndTransform", function (whoIsDemanding="USER") {
     // No population needed based on current schema refs
-    return this.toJSON();
+    return this.toJSON(whoIsDemanding);
 });
 
 // --- Static Methods ---
@@ -51,7 +51,7 @@ PackSchema.statics.Count = async function (filter = {}, limit = 10) {
   try {
     const documents = await this.find(filter).limit(limit);
     const populated = await Promise.all(documents.map(doc =>
-      doc.populateAndTransform() // Use toJSON for list performance
+      doc.populateAndTransform(whoIsDemanding) // Use toJSON for list performance
     ));
     return populated;
   } catch (error) {

@@ -3,48 +3,7 @@ const Pack = require('../models/packs.model');
 
 exports.initPacks = [
     {
-        packName: "Administration",
-        packType: "Premium",
-        packStatus: "Inactive",
-        packDesc: [{
-            DOM: 'p',
-            text: "Descriptions goes here"
-        }],
-        packPrice: {
-            price: 100,
-            discount: 0
-        },
-        packOptions: {
-            sites: 0,
-            staff: 0,
-            support: true,
-            features: ["Mixed"]
-        },
-        packeContexts: [
-        {
-            contextName: "contracts",
-        },{
-            contextName: "sites",
-        },{
-            contextName: "buildings",
-        },{
-            contextName: "apartments",
-        },{
-            contextName: "services",
-        },{
-            contextName: "tasks",
-        },{
-            contextName: "invoices",
-        },{
-            contextName: "reports",
-        },{
-            contextName: "users",
-        },{
-            contextName: "staff",
-        },]
-    },
-    {
-        packName: "Syndicate",
+        packName: "Administrator",
         packType: "Basic",
         packStatus: "Active",
         packDesc: [{
@@ -75,17 +34,14 @@ exports.initPacks = [
             "agreements",
             "services",
             "tasks",
-            "sites",
-            "buildings",
-            "apartments",
-            "commonAreas",
-            "invoices",
+            "deliveries",
+            "payments",
             "reports",
         ]
     },
-    /* {
-        packName: "Contractor",
-        packType: "Business",
+    {
+        packName: "Customer",
+        packType: "Basic",
         packStatus: "Active",
         packDesc: [{
             DOM: 'p',
@@ -93,122 +49,36 @@ exports.initPacks = [
         }],
         packPrice: {
             price: 100,
-            discount: 10
+            discount: 0
         },
         packOptions: {
-            sites: 20,
-            staff: 50,
-            support: true,
-            features: ["Mixed"]
-        },
-        packeContexts: [
-        {
-            contextName: "contracts",
-        },{
-            contextName: "sites",
-        },{
-            contextName: "buildings",
-        },{
-            contextName: "apartments",
-        },{
-            contextName: "services",
-        },{
-            contextName: "tasks",
-        },{
-            contextName: "invoices",
-        },{
-            contextName: "reports",
-        },{
-            contextName: "users",
-        },{
-            contextName: "staff",
-        },]
-    },
-    {
-        packName: "Staff",
-        packType: "Business",
-        packStatus: "Inactive",
-        packDesc: [{
-            DOM: 'p',
-            text: "Descriptions goes here"
-        }],
-        packPrice: {
-            price: 100,
-            discount: 20
-        },
-        packOptions: {
-            sites: 0,
+            contracts: 1,
+            agreements: 5,
+
+            sites: 1,
+            buildings: 12,
+            apartments: 6,
+            
             staff: 0,
             support: true,
-            features: ["Mixed"]
+            features: [{ type: "Mixed"}]
         },
-        packeContexts: [
-        {
-            contextName: "contracts",
-        },{
-            contextName: "sites",
-        },{
-            contextName: "buildings",
-        },{
-            contextName: "apartments",
-        },{
-            contextName: "services",
-        },{
-            contextName: "tasks",
-        },{
-            contextName: "invoices",
-        },{
-            contextName: "reports",
-        },{
-            contextName: "users",
-        },{
-            contextName: "staff",
-        },]
+        packContexts: [
+            "users",
+            "contractors",
+            "staff",
+            "contracts",
+            "agreements",
+            "services",
+            "tasks",
+            "deliveries",
+            "payments",
+            "reports",
+        ]
     },
     {
-        packName: "Business",
-        packType: "Business",
-        packStatus: "Inactive",
-        packDesc: [{
-            DOM: 'p',
-            text: "Descriptions goes here"
-        }],
-        packPrice: {
-            price: 100,
-            discount: 30
-        },
-        packOptions: {
-            sites: 50,
-            staff: 50 * 20,
-            support: true,
-            features: ["Mixed"]
-        },
-        packeContexts: [
-        {
-            contextName: "contracts",
-        },{
-            contextName: "sites",
-        },{
-            contextName: "buildings",
-        },{
-            contextName: "apartments",
-        },{
-            contextName: "services",
-        },{
-            contextName: "tasks",
-        },{
-            contextName: "invoices",
-        },{
-            contextName: "reports",
-        },{
-            contextName: "users",
-        },{
-            contextName: "staff",
-        },]
-    }, */
-    {
-        packName: "Premium",
-        packType: "Business",
+        packName: "Contractor",
+        packType: "Basic",
         packStatus: "Active",
         packDesc: [{
             DOM: 'p',
@@ -216,36 +86,32 @@ exports.initPacks = [
         }],
         packPrice: {
             price: 100,
-            discount: 30
+            discount: 0
         },
         packOptions: {
-            sites: 500,
-            staff: 500 * 20,
+            contracts: 1,
+            agreements: 5,
+
+            sites: 1,
+            buildings: 12,
+            apartments: 6,
+            
+            staff: 0,
             support: true,
-            features: ["Mixed"]
+            features: [{ type: "Mixed"}]
         },
-        packeContexts: [
-        {
-            contextName: "contracts",
-        },{
-            contextName: "sites",
-        },{
-            contextName: "buildings",
-        },{
-            contextName: "apartments",
-        },{
-            contextName: "services",
-        },{
-            contextName: "tasks",
-        },{
-            contextName: "invoices",
-        },{
-            contextName: "reports",
-        },{
-            contextName: "users",
-        },{
-            contextName: "staff",
-        },]
+        packContexts: [
+            "users",
+            "contractors",
+            "staff",
+            "contracts",
+            "agreements",
+            "services",
+            "tasks",
+            "deliveries",
+            "payments",
+            "reports",
+        ]
     },
 ]
 
@@ -282,10 +148,10 @@ exports.create = async function (packs) {
         // Insert a single pack or multiple packs based on the length of the array
         if (packs.length === 1) {
             const savedPack = await Pack.create(packs[0]);  // Use packs[0] for single document creation
-            returnPacks.payload = savedPack.toJSON();
+            returnPacks.payload = savedPack;
         } else {
             const savedPacks = await Pack.insertMany(packs); // Insert multiple packs
-            returnPacks.payload = savedPacks.map(pack => pack.toJSON());
+            returnPacks.payload = savedPacks;
         }
         returnPacks.code = 201; // Resource created
 
@@ -373,7 +239,9 @@ exports.findAll = async function (params) {
         const allPacks = await Pack.find();
 
         returnContext.error = false;
-        returnContext.payload = allPacks; // Return all results, success or failure 
+        returnContext.payload = await Promise.all(allPacks.map(async (pack) => {
+            return await pack.populateAndTransform("MANAGER"); // Populate and transform the document
+        }));         //allPacks; // Return all results, success or failure 
         returnContext.code = 200; // Resource created, with some possible failures 
         
         // // Loop over each site in the array and attempt to insert it 

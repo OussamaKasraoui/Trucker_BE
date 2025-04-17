@@ -82,18 +82,18 @@ usersSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // Custom toJSON method to modify the response structure
-usersSchema.method("toJSON", async function (includeSensitive = false) {
+usersSchema.method("toJSON", function (whoIsDemanding = 'USER') {
   const object = this.toObject();
-  return formatUser(object, includeSensitive);
+  return formatUser(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method for custom populated structure
-usersSchema.method("populateAndTransform", async function (whoIsDemanding = false) {
+usersSchema.method("populateAndTransform", async function (whoIsDemanding = 'USER') {
   
   // Populate related fields
   const populatePaths = [
     populationSettingsPacks('userPack', 'USER'), // Populate userPack with specific fields
-    populationSettingsRoles('userRoles', whoIsDemanding || 'USER'), // Populate userRoles with specific fields
+    populationSettingsRoles('userRoles', whoIsDemanding), // Populate userRoles with specific fields
   ];
 
   // Populate related fields

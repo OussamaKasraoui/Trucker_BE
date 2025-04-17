@@ -26,13 +26,13 @@ const contractorsSchema = new Schema({
 // --- Instance Methods ---
 
 // Custom toJSON method to modify the response structure
-contractorsSchema.method("toJSON", function () {
+contractorsSchema.method("toJSON", function (whoIsDemanding = "USER") {
   const object = this.toObject();
-  return formatContractor(object);
+  return formatContractor(object, whoIsDemanding);
 });
 
 // Custom populateAndTransform method for custom populated structure
-contractorsSchema.method("populateAndTransform", async function () {
+contractorsSchema.method("populateAndTransform", async function (whoIsDemanding = "USER") {
   
   const populatePaths = [
     populationSettingsUsers('contractorUser', 'USER'), // Populate contractorUser with specific fields
@@ -47,7 +47,7 @@ contractorsSchema.method("populateAndTransform", async function () {
     await this.populate(populatePaths[1]).execPopulate();
   }
 
-  return this.toJSON(); // Return the transformed document
+  return this.toJSON(whoIsDemanding); // Return the transformed document
 });
 
 // --- Static Methods ---

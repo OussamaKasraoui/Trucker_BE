@@ -656,6 +656,34 @@ const formatPack = function (pack, whoIsDemanding="USER") {
             
             if (pack.packName) {
                 object.name = pack.packName;
+                object.packName = pack.packName;
+            }
+        }
+        
+        // Basic info for all users
+        if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
+            if (pack.packDesc) {
+                object.packDesc = pack.packDesc
+            }
+            
+            if (pack.packOptions) {
+                object.packOptions = pack.packOptions;
+            }
+            
+            if (pack.packPrice) {
+                object.packPrice = pack.packPrice
+            }
+            
+            if (pack.packStatus) {
+                object.packStatus = pack.packStatus;
+            }
+            
+            if (pack.packType) {
+                object.packType = pack.packType
+            }
+            
+            if (pack.packContexts) {
+                object.packContexts = pack.packContexts;
             }
         }
 
@@ -1148,6 +1176,10 @@ const formatStaff = function (staff, whoIsDemanding="USER") {
 
         // Additional info for managers and admins
         if(['MANAGER', 'ADMIN'].includes(whoIsDemanding)) {
+            if (staff?.staffContractor) {
+                object.staffContractor = formatContractor(staff.staffContractor, whoIsDemanding);
+            }
+
             if (staff?.staffUser) {
                 object.staffUser = formatUser(staff.staffUser, whoIsDemanding);
             }
@@ -1161,9 +1193,6 @@ const formatStaff = function (staff, whoIsDemanding="USER") {
 
         // Sensitive info for admins only
         if(['ADMIN'].includes(whoIsDemanding)) {
-            if (staff?.staffContractor) {
-                object.staffContractor = formatContractor(staff.staffContractor, whoIsDemanding);
-            }
 
             if (staff.__v !== undefined) {
                 object.__v = staff.__v;
@@ -1314,7 +1343,7 @@ const formatUser = function (user, whoIsDemanding="USER") {
 
         // Format userPack if not null
         if (user.userPack) {
-            object.userPack = formatPack(user.userPack)
+            object.userPack = formatPack(user.userPack, whoIsDemanding)
         }
 
         // Format userRoles if not null

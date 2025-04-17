@@ -108,7 +108,7 @@ exports.findById = async function (id) {
 };
 
 
-exports.findOne = async function (query) {
+exports.findOne = async function (query, whoIsDemanding = "USER") {
   let returnResult = {
     error: false,
     payload: null,
@@ -126,7 +126,7 @@ exports.findOne = async function (query) {
   try {
     // Find the document by the query and populate the necessary fields
     const foundStaff = await Staff.findOne(query);
-    const populatedStaff = await foundStaff.populateAndTransform('staffUser staffContractor staffRole');
+    const populatedStaff = await foundStaff.populateAndTransform(whoIsDemanding);
 
     // Check if the document was found and populated
     if (!populatedStaff) {
